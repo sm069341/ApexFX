@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="assets/favicon.png" sizes="any">
+  <title>TradeXVault • Dashboard</title>
+  <meta name="theme-color" content="#05070b">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="app-body">
+  <div class="bg-glow"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-logo">
+          <img src="assets/logo.png" alt="TradeXVault Logo" />
+        </div>
+        <div class="sb-name">
+          <div class="sb-title">TradeXVault</div>
+        </div>
+      </div>
+
+      <div class="sb-user">
+        <div class="avatar" id="avatar">S</div>
+        <div class="sb-user-meta">
+          <div class="sb-user-name" id="userName">User</div>
+          <div class="sb-user-email" id="userEmail">email</div>
+        </div>
+        <button class="sb-mini-btn" id="collapseBtn" title="Collapse sidebar">⟨⟩</button>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-label">MENU</div>
+
+      <a class="sb-item active" href="dashboard.html">
+        <span class="sb-ico">▦</span>
+        <span class="sb-text">Dashboard</span>
+        <span class="sb-dot"></span>
+      </a>
+
+      <button class="sb-item" type="button" id="goTradesBtn">
+        <span class="sb-ico">≣</span>
+        <span class="sb-text">Trades</span>
+      </button>
+
+      <button class="sb-item" type="button" id="goAnalysisBtn">
+        <span class="sb-ico">▤</span>
+        <span class="sb-text">Analysis</span>
+      </button>
+
+      <div class="sb-spacer"></div>
+
+      <button class="sb-item danger" type="button" id="logoutBtn">
+        <span class="sb-ico">⎋</span>
+        <span class="sb-text">Logout</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
+
+      <div class="tb-left">
+        <div class="tb-title">
+          <h1>Dashboard</h1>
+          <p id="todayLabel">—</p>
+        </div>
+      </div>
+
+      <div class="tb-search">
+        <span class="tb-search-ico">⌕</span>
+        <input type="text" placeholder="Search..." />
+        <span class="tb-kbd">Ctrl+K</span>
+      </div>
+
+      <div class="tb-actions">
+        <button class="tb-icon" title="Theme (UI only)">☾</button>
+        <button class="tb-icon primary" title="Quick add (UI only)">＋</button>
+        <div class="tb-clock" id="clock">--:--</div>
+        <button class="tb-icon" title="Notifications">🔔</button>
+        <div class="tb-avatar" id="topAvatar">S</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+      <!-- Stat cards row -->
+      <section class="grid-stats">
+        <div class="card stat primary-stat">
+          <div class="stat-head">
+            <div class="stat-ico blue">💲</div>
+            <div class="pill">TOTAL</div>
+          </div>
+          <div class="stat-label">TOTAL P&amp;L</div>
+          <div class="stat-value" id="totalPnL">$0.00</div>
+          <div class="stat-sub">
+            <span id="tradeCountLink">→ 0 trades</span>
+          </div>
+        </div>
+    
+        <div class="card stat">
+          <div class="stat-head">
+            <div class="stat-ico blue2">🎯</div>
+          </div>
+          <div class="stat-label">WIN RATE</div>
+          <div class="stat-value" id="winRate">0%</div>
+          <div class="progress">
+            <div class="bar" id="winRateBar" style="width:0%"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Second row -->
+      <section class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="tiny">PERFORMANCE</span>
+              <h3 id="performanceLabel">$0.00</h3>
+            </div>
+            <div class="seg">
+              <button class="seg-btn">1D</button>
+              <button class="seg-btn active">1W</button>
+              <button class="seg-btn">1M</button>
+              <button class="seg-btn">3M</button>
+              <button class="seg-btn">ALL</button>
+            </div>
+          </div>
+
+          <div class="chart-shell">
+            <div class="chart-grid"></div>
+            <div class="chart-empty" id="chartEmpty">No trades taken</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <h3>Monthly P&amp;L</h3>
+              <span class="muted" id="monthLabel">Monthly: $0.00</span>
+            </div>
+            <div class="muted" id="monthRight">—</div>
+          </div>
+        
+          <div class="calendar">
+            <div class="cal-head">
+              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              <span class="cal-weekly-label">Weekly</span>
+            </div>
+        
+            <div class="cal-grid" id="calGrid"></div>
+        
+            <div class="cal-legend">
+              <span><i class="dot profit"></i> Profit</span>
+              <span><i class="dot loss"></i> Loss</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom News bar -->
+      <section class="newsbar">
+        <div class="news-dot"></div>
+        <div class="news-text" id="newsText">
+          NEWS • Add trades to see your dashboard stats update in real-time.
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile bottom nav -->
+    <nav class="bottom-nav mobile-only">
+      <a class="bn-item active" href="dashboard.html">Dashboard</a>
+      <button class="bn-item" type="button" id="bnTrades">Trades</button>
+      <button class="bn-item" type="button" id="bnAnalysis">Analysis</button>
+    </nav>
+  </div>
+
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
