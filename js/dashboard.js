@@ -1,6 +1,12 @@
 import { auth, db } from "./firebase.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  collection,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const $ = (id) => document.getElementById(id);
 
@@ -29,18 +35,27 @@ function setUserUI(user) {
 
 function setTodayAndClock() {
   const d = new Date();
-  $("todayLabel").textContent = d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  $("todayLabel").textContent = d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
   const tick = () => {
     const now = new Date();
-    $("clock").textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    $("clock").textContent = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
   tick();
   setInterval(tick, 1000);
 }
 
 function wireUI() {
-  $("collapseBtn").addEventListener("click", () => sidebar.classList.toggle("collapsed"));
+  $("collapseBtn").addEventListener("click", () =>
+    sidebar.classList.toggle("collapsed"),
+  );
 
   const openMenu = () => {
     sidebar.classList.add("open");
@@ -54,11 +69,23 @@ function wireUI() {
   $("menuBtn").addEventListener("click", openMenu);
   overlay.addEventListener("click", closeMenu);
 
-  $("goTradesBtn").addEventListener("click", () => window.location.href = "trades.html");
- $("goAnalysisBtn")?.addEventListener("click", () => window.location.href = "analysis.html");
+  $("goTradesBtn").addEventListener(
+    "click",
+    () => (window.location.href = "trades.html"),
+  );
+  $("goAnalysisBtn")?.addEventListener(
+    "click",
+    () => (window.location.href = "analysis.html"),
+  );
 
-  $("bnTrades").addEventListener("click", () => window.location.href = "trades.html");
-  $("bnAnalysis")?.addEventListener("click", () => window.location.href = "analysis.html");
+  $("bnTrades").addEventListener(
+    "click",
+    () => (window.location.href = "trades.html"),
+  );
+  $("bnAnalysis")?.addEventListener(
+    "click",
+    () => (window.location.href = "analysis.html"),
+  );
 
   $("logoutBtn").addEventListener("click", async () => {
     await signOut(auth);
@@ -70,7 +97,12 @@ function wireUI() {
 function getTradeDate(t) {
   // Prefer "closedAt" / "date" / "createdAt"
   const cand =
-    t.closedAt || t.date || t.tradeDate || t.createdAt || t.openTime || t.timestamp;
+    t.closedAt ||
+    t.date ||
+    t.tradeDate ||
+    t.createdAt ||
+    t.openTime ||
+    t.timestamp;
 
   // Firestore Timestamp
   if (cand && typeof cand.toDate === "function") return cand.toDate();
@@ -99,7 +131,10 @@ function buildMonthlyCalendar(dailyPnLMap, year, monthIndex) {
   grid.innerHTML = "";
 
   const now = new Date(year, monthIndex, 1);
-  const monthName = now.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const monthName = now.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
   $("monthRight").textContent = monthName;
 
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
@@ -146,7 +181,7 @@ function buildMonthlyCalendar(dailyPnLMap, year, monthIndex) {
       cell.className = cls;
       cell.innerHTML = `
         <div class="cal-day">${dayCounter}</div>
-        <div class="cal-pl">${money(dayPnl)}</div>
+        ${dayPnl !== 0 ? `<div class="cal-pl">${money(dayPnl)}</div>` : ``}
       `;
 
       grid.appendChild(cell);
@@ -222,9 +257,6 @@ async function loadDashboard(uid) {
 
   $("winRate").textContent = pct(winRate);
   $("winRateBar").style.width = `${Math.max(0, Math.min(100, winRate))}%`;
-
-  $("performanceLabel").textContent = money(total);
-  $("chartEmpty").textContent = snap.size === 0 ? "No trades taken" : "Chart (we’ll add in Analytics later)";
 
   $("monthLabel").textContent = `Monthly: ${money(monthlyTotal)}`;
 
