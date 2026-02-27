@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="theme-color" content="#05070b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" href="assets/favicon.png" sizes="any">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>TradeXVault • Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <header class="auth-header">
+        <div class="sb-logo">
+          <img src="assets/logo.png" alt="TradeXVault Logo" />
+        </div>
+          <div class="brand-text">
+            <h1>Trade<span>X</span>Vault</h1>
+            <p>Secure trading journal</p>
+          </div>
+        </div>
+      </header>
+
+      <div class="divider"></div>
+
+      <form id="loginForm" class="form">
+        <label class="field">
+          <span>Email</span>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+        </label>
+
+        <label class="field">
+          <span>Password</span>
+          <div class="password-wrap">
+            <input id="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+            <button type="button" id="togglePass" class="icon-btn" aria-label="Toggle password">
+              👁
+            </button>
+          </div>
+        </label>
+
+        <button class="primary-btn" type="submit" id="loginBtn">
+          <span class="dot"></span>
+          Login
+        </button>
+
+        <div class="row">
+          <button type="button" id="forgotBtn" class="link-btn">Forgot password?</button>
+          <span class="muted">No register page (as requested)</span>
+        </div>
+
+        <p id="msg" class="msg" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <footer class="auth-footer">
+      <span class="muted">© <span id="year"></span> TradeXVault</span>
+    </footer>
+  </main>
+
+  <script type="module" src="js/auth.js"></script>
+</body>
+</html>

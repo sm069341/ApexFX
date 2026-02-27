@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="assets/favicon.png" sizes="any">
+  <title>TradeXVault • Analysis</title>
+  <meta name="theme-color" content="#05070b">
+  <link rel="stylesheet" href="css/analysis.css" />
+</head>
+
+<body class="app">
+  <div class="bg-glow"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-logo">
+          <img src="assets/logo.png" alt="TradeXVault Logo" />
+        </div>
+        <div class="sb-name">
+          <div class="sb-title">TradeXVault</div>
+        </div>
+      </div>
+
+      <div class="sb-user">
+        <div class="avatar" id="avatar">U</div>
+        <div class="sb-user-meta">
+          <div class="sb-user-name" id="userName">User</div>
+          <div class="sb-user-email" id="userEmail">email</div>
+        </div>
+        <button class="sb-mini-btn" id="collapseBtn" title="Collapse sidebar">⟨⟩</button>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-label">MENU</div>
+
+      <a class="sb-item" href="dashboard.html">
+        <span class="sb-ico">▦</span>
+        <span class="sb-text">Dashboard</span>
+      </a>
+
+      <a class="sb-item" href="trades.html">
+        <span class="sb-ico">≣</span>
+        <span class="sb-text">Trades</span>
+      </a>
+
+      <a class="sb-item active" href="analysis.html">
+        <span class="sb-ico">▤</span>
+        <span class="sb-text">Analysis</span>
+        <span class="sb-dot"></span>
+      </a>
+
+      <div class="sb-spacer"></div>
+
+      <button class="sb-item danger" type="button" id="logoutBtn">
+        <span class="sb-ico">⎋</span>
+        <span class="sb-text">Logout</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Topbar -->
+<header class="topbar" id="topbar">
+  <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
+
+  <div class="tb-title">
+    <h1>Analysis</h1>
+    <p id="todayLabel">—</p>
+  </div>
+</header>
+
+    <main class="content">
+
+      <!-- Controls -->
+      <section class="controls card">
+        <div class="group">
+          <div class="group-label muted">TIME PERIOD</div>
+          <div class="chips" id="timeChips">
+            <button class="chip" data-range="today">Today</button>
+            <button class="chip" data-range="7d">7 Days</button>
+            <button class="chip active" data-range="30d">30 Days</button>
+            <button class="chip" data-range="3m">3 Months</button>
+            <button class="chip" data-range="1y">1 Year</button>
+            <button class="chip" data-range="all">All Time</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-label muted">FILTER BY</div>
+          <div class="chips" id="filterChips">
+            <button class="chip active" data-filter="all">All Trades</button>
+            <button class="chip" data-filter="winners">Winners</button>
+            <button class="chip" data-filter="losers">Losers</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Top metric cards -->
+      <section class="grid-4">
+        <div class="card stat primary">
+          <div class="stat-top">
+            <div class="stat-ico blue">💲</div>
+          </div>
+          <div class="stat-label">TOTAL P&amp;L</div>
+          <div class="stat-value" id="totalPnl">$0.00</div>
+          <div class="stat-sub muted" id="totalPnlSub">From 0 closed trades</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-top">
+            <div class="stat-ico cyan">✓</div>
+          </div>
+          <div class="stat-label">WIN RATE</div>
+          <div class="stat-value green" id="winRate">0.0%</div>
+          <div class="stat-sub muted" id="winRateSub">0 wins • 0 losses</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-top">
+            <div class="stat-ico purple">▮</div>
+          </div>
+          <div class="stat-label">PROFIT FACTOR</div>
+          <div class="stat-value green" id="profitFactor">0.00</div>
+          <div class="stat-sub muted">Gross profit ÷ Gross loss</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-top">
+            <div class="stat-ico amber">◎</div>
+          </div>
+          <div class="stat-label">EXPECTANCY</div>
+          <div class="stat-value blueText" id="expectancy">$0.00</div>
+          <div class="stat-sub muted">Average per trade</div>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <!-- Quick Stats -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="card-ico">▦</span>
+              Quick Stats
+            </div>
+          </div>
+
+          <div class="quick-grid">
+            <div class="mini">
+              <div class="mini-label muted">AVG WINNER</div>
+              <div class="mini-val green" id="avgWinner">$0.00</div>
+            </div>
+            <div class="mini">
+              <div class="mini-label muted">AVG LOSER</div>
+              <div class="mini-val red" id="avgLoser">-$0.00</div>
+            </div>
+            <div class="mini">
+              <div class="mini-label muted">BEST TRADE</div>
+              <div class="mini-val green" id="bestTrade">$0.00</div>
+            </div>
+            <div class="mini">
+              <div class="mini-label muted">WORST TRADE</div>
+              <div class="mini-val red" id="worstTrade">$0.00</div>
+            </div>
+            <div class="mini">
+              <div class="mini-label muted">WIN STREAK</div>
+              <div class="mini-val" id="winStreak">0 trades</div>
+            </div>
+            <div class="mini">
+              <div class="mini-label muted">LOSS STREAK</div>
+              <div class="mini-val" id="lossStreak">0 trades</div>
+            </div>
+            <div class="mini span2">
+              <div class="mini-label muted">RISK : REWARD</div>
+              <div class="mini-val" id="riskReward">0.00</div>
+              <div class="mini-sub muted">Avg win ÷ Avg loss (absolute)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Equity curve -->
+        <div class="card">
+          <div class="card-head split">
+            <div>
+              <div class="card-title">
+                <span class="card-ico">↗</span>
+                Equity Curve
+              </div>
+              <div class="muted">Cumulative P&amp;L progression</div>
+            </div>
+
+            <div class="toggle">
+              <button class="toggle-btn active" id="btnEquity">Equity</button>
+              <button class="toggle-btn" id="btnDrawdown">Drawdown</button>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <div class="chart-empty muted" id="chartEmpty">Complete trades to see your equity curve</div>
+            <svg class="chart" id="chart" viewBox="0 0 1000 320" preserveAspectRatio="none" aria-label="Equity chart">
+              <polyline id="chartLine" fill="none" stroke="rgba(43,123,255,.9)" stroke-width="3" points=""></polyline>
+              <polyline id="chartFill" fill="rgba(43,123,255,.10)" stroke="none" points=""></polyline>
+            </svg>
+          </div>
+
+          <div class="muted footnote" id="chartNote">Drawdown = decline from peak equity</div>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">
+                <span class="card-ico">↑↓</span>
+                Long vs Short
+              </div>
+              <div class="muted">Performance by trade direction</div>
+            </div>
+          </div>
+
+          <div class="ls-wrap">
+            <div class="ls-card long">
+              <div class="ls-top">
+                <div class="ls-name">
+                  <span class="ls-arrow long">↗</span>
+                  Long
+                </div>
+              </div>
+              <div class="ls-row">
+                <div class="ls-m">
+                  <div class="ls-l muted">TRADES</div>
+                  <div class="ls-v" id="longTrades">0</div>
+                </div>
+                <div class="ls-m">
+                  <div class="ls-l muted">P&amp;L</div>
+                  <div class="ls-v blueText" id="longPnl">$0.00</div>
+                </div>
+                <div class="ls-m">
+                  <div class="ls-l muted">WIN %</div>
+                  <div class="ls-v" id="longWin">0.0%</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ls-card short">
+              <div class="ls-top">
+                <div class="ls-name">
+                  <span class="ls-arrow short">↘</span>
+                  Short
+                </div>
+              </div>
+              <div class="ls-row">
+                <div class="ls-m">
+                  <div class="ls-l muted">TRADES</div>
+                  <div class="ls-v" id="shortTrades">0</div>
+                </div>
+                <div class="ls-m">
+                  <div class="ls-l muted">P&amp;L</div>
+                  <div class="ls-v blueText" id="shortPnl">$0.00</div>
+                </div>
+                <div class="ls-m">
+                  <div class="ls-l muted">WIN %</div>
+                  <div class="ls-v" id="shortWin">0.0%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">
+                <span class="card-ico">📅</span>
+                Day Performance
+              </div>
+              <div class="muted">Find your best trading days</div>
+            </div>
+          </div>
+
+          <div class="day-list" id="dayList"></div>
+        </div>
+      </section>
+
+      <!-- Mobile bottom nav -->
+      <nav class="bottom-nav mobile-only">
+        <a class="bn-item" href="dashboard.html">Dashboard</a>
+        <a class="bn-item" href="trades.html">Trades</a>
+        <a class="bn-item active" href="analysis.html">Analysis</a>
+      </nav>
+    </main>
+
+    <div class="overlay" id="overlay"></div>
+  </div>
+
+  <script type="module" src="js/analysis.js"></script>
+</body>
+</html>

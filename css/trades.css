@@ -1,0 +1,782 @@
+/* =========================
+   TradeXVault - Trades UI
+   Includes Modal + Mobile layout
+   FULL REPLACE FILE (CLEAN)
+   ========================= */
+
+@import url("./style.css");
+
+/* Trades page specific fixes/overrides */
+body.app{
+  margin:0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  overflow-x:hidden;
+}
+
+.app{ min-height:100vh; display:flex; }
+
+.main{
+  margin-left: var(--sb-w);
+  width: calc(100% - var(--sb-w));
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Remove Ctrl+K everywhere */
+.tb-kbd{ display:none !important; }
+
+/* =========================
+   PAGE HEAD (motto row)
+   ========================= */
+.page-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.right-actions{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+}
+
+/* Motto row (PATIENCE / DISCIPLINE / CONSISTENCY) */
+.subrow{
+  margin-top: 6px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Hide old dot separators if you have them in HTML */
+.subrow .dot-muted{ display:none; }
+
+/* Motto chips using your existing spans (.muted) */
+.subrow .muted{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: .18em;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: rgba(235,240,255,.84);
+
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.12));
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 10px 26px rgba(0,0,0,.35);
+
+  white-space: nowrap;
+}
+
+/* Colored dot for each item */
+.subrow .muted::before{
+  content:"";
+  width: 8px;
+  height: 8px;
+  border-radius: 99px;
+  background: rgba(43,123,255,.95);
+  box-shadow: 0 0 0 4px rgba(43,123,255,.14);
+}
+
+/* Your HTML has: dot-muted + muted + dot-muted + muted...
+   So the nth-of-type indexes can be tricky.
+   This still looks good even if all are blue. */
+/* If you want exact colors, change HTML to class="motto-chip" and use nth-child. */
+
+
+/* =========================
+   BUTTONS
+   ========================= */
+.ghost-btn{
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  cursor:pointer;
+  color: rgba(235,240,255,.80);
+}
+.ghost-btn:hover{ background: rgba(255,255,255,.05); }
+
+.tb-pill{
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  cursor:pointer;
+}
+.tb-pill.primary{
+  background: rgba(43,123,255,.22);
+  border-color: rgba(43,123,255,.26);
+}
+
+/* =========================
+   TRADE CARD / TABLE (desktop)
+   ========================= */
+.trade-card{ padding-bottom: 8px; }
+
+.table-wrap{
+  padding: 0 18px 18px;
+  overflow:auto; /* desktop/tablet can scroll inside the table area if needed */
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.table{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+thead th{
+  text-align:left;
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: rgba(235,240,255,.45);
+  padding: 14px 10px;
+}
+
+tbody td{
+  padding: 14px 10px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  color: rgba(235,240,255,.82);
+}
+
+tbody tr:hover td{ background: rgba(255,255,255,.02); }
+.empty-row td{ padding: 26px 10px; }
+
+.empty{
+  display:grid;
+  place-items:center;
+  gap: 10px;
+  padding: 18px;
+}
+
+.empty-ico{
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display:grid;
+  place-items:center;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+  opacity:.9;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.22);
+}
+.badge.long{ border-color: rgba(90,255,200,.18); background: rgba(90,255,200,.06); }
+.badge.short{ border-color: rgba(255,90,90,.18); background: rgba(255,90,90,.06); }
+
+.pnl.profit{ color: rgba(90,255,200,.92); }
+.pnl.loss{ color: rgba(255,90,90,.92); }
+
+/* =========================
+   FILTERS PANEL
+   ========================= */
+.filters-panel{
+  margin: 14px 0 0;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.filters-grid{
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+}
+.filter-group.wide{ grid-column: 1 / -1; }
+
+.filter-label{
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(235,240,255,.55);
+  margin: 4px 0 10px;
+}
+
+.chip-row{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fchip{
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(235,240,255,.75);
+  cursor: pointer;
+  font-size: 14px;
+}
+.fchip.active{
+  background: rgba(0,120,255,.18);
+  border-color: rgba(0,120,255,.35);
+  color: rgba(235,240,255,.95);
+}
+
+.fchip .cnt{ opacity: .75; margin-left: 6px; }
+
+.filters-footer{
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Trade History header right buttons */
+.card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.card-right{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.card-right .tb-pill,
+.card-right .ghost-btn{
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  white-space: nowrap;
+}
+
+/* =========================
+   MODAL
+   ========================= */
+.modal-root{
+  position: fixed;
+  inset:0;
+  z-index: 80;
+  display:none;
+}
+.modal-root.show{ display:block; overflow: hidden; }
+
+.modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.60);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal{
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  position: relative;
+  width: min(720px, calc(100% - 28px));
+  margin: 70px auto;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: linear-gradient(180deg, rgba(14,18,26,.86), rgba(10,14,20,.78));
+  box-shadow: 0 28px 80px rgba(0,0,0,.65);
+  padding: 16px;
+}
+.modal::-webkit-scrollbar{ display:none; }
+
+.modal-head{
+  position: static;
+  background: linear-gradient(180deg, rgba(14,18,26,.96), rgba(14,18,26,.75));
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  padding-bottom: 12px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+
+.modal-title{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+.modal-plus{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  display:grid;
+  place-items:center;
+  background: rgba(43,123,255,.18);
+  border: 1px solid rgba(43,123,255,.25);
+}
+
+.modal-h{ font-weight: 900; font-size: 18px; }
+.modal-sub{ font-size: 12px; }
+
+.xbtn{
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  cursor:pointer;
+}
+.xbtn:hover{ background: rgba(255,255,255,.05); }
+
+.step{ padding: 8px 6px 10px; }
+.step-label{ font-size: 11px; letter-spacing:.12em; }
+.step-hint{ margin-top: 10px; font-size: 13px; }
+
+.pl-choice{ display:flex; gap: 12px; margin-top: 10px; }
+
+.pl-btn{
+  flex:1;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+  cursor:pointer;
+  font-weight: 800;
+}
+.pl-btn.profit{ border-color: rgb(0, 255, 8); }
+.pl-btn.loss{ border-color: rgb(252, 0, 0); }
+.pl-btn.selected.profit{ background: rgb(87, 249, 147); }
+.pl-btn.selected.loss{ background: rgb(255, 92, 92); }
+
+.form{ padding: 8px 6px 6px; }
+
+.seg{
+  display:flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+}
+.seg-btn{
+  flex:1;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor:pointer;
+  color: rgba(235,240,255,.70);
+  font-weight: 800;
+}
+.seg-btn.active{
+  background: rgba(120, 0, 0, 0.25);
+  border-color: rgba(200, 40, 40, 0.50);
+  color: rgba(235,240,255,.92);
+}
+.seg-btn[data-side="long"].active{
+  background: rgba(0, 120, 70, 0.22);
+  border-color: rgba(0, 160, 90, 0.50);
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.field{ display:flex; flex-direction:column; gap: 6px; }
+.field > span{
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: rgba(235,240,255,.45);
+}
+.field input, .field select, .field textarea{
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(0,0,0,.22);
+  outline:none;
+}
+.field input:focus, .field select:focus, .field textarea:focus{
+  border-color: rgba(43,123,255,.30);
+  box-shadow: 0 0 0 4px rgba(43,123,255,.10);
+}
+
+.divider{
+  height: 1px;
+  background: rgba(255,255,255,.06);
+  margin: 14px 0;
+}
+
+.calc-row{
+  grid-column: 1 / -1;
+  display:flex;
+  justify-content:space-between;
+  gap: 12px;
+  align-items:flex-end;
+  padding: 10px 0 0;
+}
+.calc-pill{
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(0,0,0,.22);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  display:inline-block;
+}
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.primary-btn{
+  padding: 11px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(43,123,255,.25);
+  background: rgba(43,123,255,.85);
+  cursor:pointer;
+  font-weight: 900;
+}
+.primary-btn:hover{ filter: brightness(1.05); }
+
+.msg{ margin: 10px 0 0; font-size: 13px; }
+.msg.ok{ color: rgba(90,255,200,.92); }
+.msg.err{ color: rgba(255,90,90,.92); }
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+/* <=900: filters layout */
+@media (max-width: 900px){
+  .filters-grid{ grid-template-columns: 1fr; }
+}
+
+/* <=860: mobile/tablet layout + sticky topbar + SHOW SEARCH + stop overflow */
+@media (max-width: 860px){
+  html, body{
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .main{ margin-left: 0; width: 100%; }
+
+  /* Make topbar stacked so search is NOT half */
+  .topbar{
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    display:flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 10px 14px !important;
+    background: linear-gradient(180deg, rgba(5,7,11,.96), rgba(5,7,11,.75)) !important;
+    border-bottom: 1px solid rgba(255,255,255,.06) !important;
+  }
+
+    /* IMPORTANT:
+     Make the WHOLE header NOT sticky,
+     only tb-row + search will be sticky (navbar part). */
+  #topbar.topbar{
+    position: static !important;
+    display: block !important;
+    padding-bottom: 10px !important;
+    background: transparent !important;
+    border-bottom: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Sticky navbar row (menu + Trades + date) */
+  #topbar .tb-row{
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 14px;
+    background: linear-gradient(180deg, rgba(5,7,11,.96), rgba(5,7,11,.84));
+    border-bottom: 1px solid rgba(255,255,255,.06);
+
+    box-sizing: border-box;
+  }
+
+  /* Sticky search below title row */
+  #topbar .tb-search{
+    position: sticky;
+    top: 64px; /* height of tb-row area, adjust if needed (52-64px) */
+    z-index: 9998;
+
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 14px 12px;
+    background: linear-gradient(180deg, rgba(5,7,11,.90), rgba(5,7,11,.72));
+    border-bottom: 1px solid rgba(255,255,255,.06);
+
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #topbar .tb-search input{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Motto chips BELOW navbar (not sticky) */
+  #topbar .top-motto{
+    position: static !important;
+    z-index: auto !important;
+
+    margin-top: 8px !important;
+    padding-bottom: 10px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px;
+
+    padding: 10px 14px 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #topbar .motto-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+
+    font-size: 10px;
+    letter-spacing: .16em;
+    font-weight: 900;
+    text-transform: uppercase;
+
+    color: rgba(235,240,255,.88);
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(0,0,0,.14));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 10px 22px rgba(0,0,0,.35);
+    white-space: nowrap;
+  }
+
+  #topbar .motto-chip::before{
+    content:"";
+    width: 8px;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(43,123,255,.95);
+    box-shadow: 0 0 0 4px rgba(43,123,255,.14);
+  }
+  #topbar .motto-chip:nth-child(2)::before{
+    background: rgba(34,211,238,.95);
+    box-shadow: 0 0 0 4px rgba(34,211,238,.14);
+  }
+  #topbar .motto-chip:nth-child(3)::before{
+    background: rgba(90,255,200,.95);
+    box-shadow: 0 0 0 4px rgba(90,255,200,.14);
+  }
+
+  /* Give space so Trade History starts AFTER motto */
+  .content{
+    padding-top: 130px !important;
+  }
+
+  .tb-title{
+    width: 100% !important;
+  }
+
+  /* Show search on mobile (style.css hides it) */
+  .tb-search{
+    display:flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .tb-search input{
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Sidebar mobile */
+  .sidebar{ transform: translateX(-105%); }
+  .sidebar.open{ transform: translateX(0); }
+  .mobile-only{ display:inline-flex; }
+
+  /* Avoid right scroll between 621–860 */
+  .table-wrap{ overflow: hidden; }
+  .table{ min-width: 0 !important; width: 100% !important; }
+
+  /* Trade History header buttons wrap if needed */
+  .card-right{
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+   /* If still tight on some phones, increase a little */
+  @supports (padding: max(0px)) {
+    .content{
+      padding-top: max(130px, 14px) !important;
+    }
+  }
+}
+
+/* <=620: Table -> Card rows (no horizontal scroll) */
+@media (max-width: 620px){
+
+  .table-wrap{ overflow: visible; }
+  .table{ min-width: 0 !important; width: 100%; }
+  .table thead{ display:none; }
+
+  .table tbody tr{
+    display: block;
+    margin: 10px 0;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: rgba(0,0,0,.20);
+    overflow: hidden;
+  }
+
+  .table tbody td{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-top: 1px solid rgba(255,255,255,.05);
+  }
+
+  tbody tr:hover td{ background: transparent; }
+
+  .table tbody td::before{
+    content: attr(data-label);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: rgba(235,240,255,.45);
+    text-transform: uppercase;
+    flex-shrink: 0;
+    margin-right: 10px;
+  }
+
+  .table tbody tr td:nth-child(2){
+    font-weight: 900;
+    font-size: 14px;
+  }
+
+  .table tbody tr td:last-child{
+    font-weight: 900;
+  }
+
+  /* empty state row should stay normal */
+  .table tbody tr.empty-row{ display: table-row; }
+  .table tbody tr.empty-row td{ display: table-cell; }
+  .table tbody tr.empty-row td::before{ content: ""; }
+
+  /* Motto chips slightly smaller on small screens */
+  .subrow .muted{
+    padding: 7px 10px;
+    font-size: 10px;
+    letter-spacing: .16em;
+  }
+}
+
+@media (max-width: 420px){
+  .modal{ width: calc(100% - 18px); padding: 12px; }
+  .pl-choice{ flex-direction:column; }
+  .content{ padding-top: 140px !important; }
+}
+
+/* ================================
+   FIX TOPBAR (MOBILE)
+   - Search full width (not half)
+   - Motto visible
+   ================================ */
+
+#topbar{
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Remove any possible horizontal overflow source */
+html, body, .main{
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
+/* ==============================
+   MOBILE MODAL FIX (SCROLL + Z-INDEX)
+   Paste at END of trades.css
+   ============================== */
+
+.modal-root{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;   /* above everything */
+}
+
+/* allow modal root itself to scroll on small screens */
+.modal-root.show{
+  display: block !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+/* backdrop must also be fixed */
+.modal-backdrop{
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99998 !important;
+}
+
+/* modal box must be scrollable */
+.modal{
+  position: relative !important;
+  z-index: 99999 !important;
+  max-height: calc(100dvh - 24px) !important; /* mobile safe height */
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-y !important;
+}
+
+/* mobile spacing so it doesn't hide behind sticky header */
+@media (max-width: 860px){
+  .modal{
+    margin: 12px auto !important;
+  }
+}
+
+/* ensure bottom nav NEVER sits above modal */
+.bottom-nav{
+  z-index: 50 !important;
+}
+
+/* ensure sidebar also stays below modal */
+.sidebar{
+  z-index: 60 !important;
+}
