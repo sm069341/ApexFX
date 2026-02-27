@@ -1,0 +1,151 @@
+<div class="bg-glow"></div>
+
+<div class="app-body">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="sb-brand">
+        <div class="sb-logo">
+          <img src="assets/logo.png" alt="Logo">
+        </div>
+        <div class="sb-name">
+          <div class="sb-title">TradeXVault</div>
+          <div class="sb-text muted">Secure journal</div>
+        </div>
+      </div>
+
+      <div class="sb-user">
+        <div class="avatar" id="avatar">U</div>
+        <div class="sb-user-meta">
+          <div class="sb-user-name" id="userName">User</div>
+          <div class="sb-user-email" id="userEmail">user@email.com</div>
+        </div>
+        <!-- <button class="sb-mini-btn" id="collapseBtn" type="button">⟷</button> -->
+      </div>
+
+      <div class="sb-nav">
+        <div class="sb-label">Menu</div>
+
+        <a class="sb-item active" href="#dashboard">
+          <div class="sb-ico">🏠</div>
+          <div class="sb-text">Dashboard</div>
+          <span class="sb-dot"></span>
+        </a>
+
+        <a class="sb-item" href="#trades">
+          <div class="sb-ico">📒</div>
+          <div class="sb-text">Trades</div>
+        </a>
+
+        <a class="sb-item" href="#analysis">
+          <div class="sb-ico">📊</div>
+          <div class="sb-text">Analysis</div>
+        </a>
+
+        <div class="sb-spacer"></div>
+
+        <button class="sb-item danger" id="logoutBtn" type="button">
+          <div class="sb-ico">⎋</div>
+          <div class="sb-text">Logout</div>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main">
+    <header class="topbar" id="topbar">
+      <div class="tb-left">
+        <button class="tb-icon mobile-only" id="menuBtn" type="button">☰</button>
+        <div class="tb-title">
+          <h1>Dashboard</h1>
+          <p id="todayLabel">Today</p>
+        </div>
+      </div>
+
+      <div class="tb-search">
+        <span class="tb-search-ico">⌕</span>
+        <input type="text" placeholder="Search trades..." />
+        <span class="tb-kbd">Ctrl K</span>
+      </div>
+
+      <div class="tb-actions">
+        <!-- <div class="tb-clock" id="clock">--:--</div> -->
+        <div class="tb-avatar" id="topAvatar">U</div>
+      </div>
+    </header>
+
+    <section class="content">
+      <!-- Your existing dashboard content stays exactly the same -->
+      <!-- (This file is taken from your dashboard.html body content without scripts) -->
+
+      <div class="grid-stats">
+        <div class="card stat primary-stat">
+          <div class="stat-head">
+            <div class="stat-ico blue">💰</div>
+            <span class="pill">TOTAL</span>
+          </div>
+          <div class="stat-label">Total P&amp;L</div>
+          <div class="stat-value" id="totalPnL">$0.00</div>
+          <div class="stat-sub" id="tradeCountLink">→ 0 trades</div>
+
+          <div class="progress">
+            <div class="bar" id="winRateBar" style="width:0%"></div>
+          </div>
+          <div class="stat-label" style="margin-top:10px;">Win Rate</div>
+          <div class="stat-value" style="font-size:28px;" id="winRate">0%</div>
+        </div>
+
+        <div class="card stat">
+          <div class="stat-head">
+            <div class="stat-ico blue2">📈</div>
+            <span class="pill">MONTH</span>
+          </div>
+          <div class="stat-label" id="monthLabel">Monthly: $0.00</div>
+          <div class="stat-value">Calendar</div>
+          <div class="stat-sub" id="goTradesBtn" style="cursor:pointer;">→ View Trades</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="tiny">OVERVIEW</div>
+              <h3>Monthly Calendar</h3>
+            </div>
+            <div class="seg">
+              <button class="seg-btn active" type="button">This Month</button>
+              <button class="seg-btn" type="button" id="goAnalysisBtn">Analysis</button>
+            </div>
+          </div>
+
+          <div class="calendar">
+            <div class="cal-head">
+              <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+              <div class="cal-weekly-label">WEEKLY</div>
+            </div>
+
+            <div class="cal-grid" id="calGrid"></div>
+
+            <div class="cal-legend">
+              <span><i class="dot profit"></i> Profit</span>
+              <span><i class="dot loss"></i> Loss</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="newsbar">
+        <span class="news-dot"></span>
+        <div class="news-text">Track every trade. Improve every week.</div>
+      </div>
+    </section>
+
+    <nav class="bottom-nav">
+      <button class="bn-item active" type="button">🏠</button>
+      <button class="bn-item" id="bnTrades" type="button">📒</button>
+      <button class="bn-item" id="bnAnalysis" type="button">📊</button>
+    </nav>
+  </main>
+</div>
