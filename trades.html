@@ -25,7 +25,6 @@
       </div>
 
       <div class="sb-user">
-        <div class="avatar" id="avatar">S</div>
         <div class="sb-user-meta">
           <div class="sb-user-name" id="userName">User</div>
           <div class="sb-user-email" id="userEmail">email</div>
@@ -65,52 +64,41 @@
   <!-- Main -->
   <div class="main">
     <!-- Topbar -->
-    <header class="topbar">
-      <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
-
-      <div class="tb-title">
-        <h1>Trades</h1>
-        <p id="todayLabel">—</p>
+    <header class="topbar" id="topbar">
+      <div class="tb-row">
+        <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
+  
+        <div class="tb-title">
+          <h1>Trades</h1>
+          <p id="todayLabel">—</p>
+        </div>
       </div>
-
+  
       <div class="tb-search">
         <span class="tb-search-ico">⌕</span>
         <input id="searchInput" type="text" placeholder="Search..." />
-        <span class="tb-kbd">Ctrl+K</span>
       </div>
-
-      <div class="tb-actions">
-        <button class="tb-pill primary" type="button" id="addTradeBtn">＋ Add Trade</button>
-        <div class="tb-avatar" id="topAvatar">S</div>
+      
+      <div class="top-motto" id="topMotto">
+        <span class="motto-chip">PATIENCE</span>
+        <span class="motto-chip">DISCIPLINE</span>
+        <span class="motto-chip">CONSISTENCY</span>
       </div>
     </header>
 
     <!-- Content -->
     <main class="content">
-      <section class="page-head">
-        <div>
-          <h2 class="h2">Trades</h2>
-          <div class="subrow">
-            <span class="dot-muted"></span>
-            <span class="muted">&nbsp;PATIENCE&nbsp;</span>
-            <span class="dot-muted"></span>
-            <span class="muted">&nbsp;DISCIPLINE&nbsp;</span>
-            <span class="dot-muted"></span>
-            <span class="muted">&nbsp;CONSISTENCY&nbsp;</span>
-            <span class="dot-muted"></span>
-          </div>
-        </div>
-
-        <div class="right-actions">
-          <button class="ghost-btn" id="filtersBtn" type="button">⚲ Filters</button>
-        </div>
-      </section>
 
       <section class="card trade-card">
         <div class="card-head">
           <div class="card-left">
             <div class="card-title">Trade History</div>
             <div class="muted" id="tradeCountLabel">0 of 0 trades</div>
+          </div>
+        
+          <div class="card-right">
+            <button class="tb-pill primary" type="button" id="addTradeBtn2">＋ Add Trade</button>
+            <button class="ghost-btn" id="filtersBtn" type="button">⚲ Filters</button>
           </div>
         </div>
 
