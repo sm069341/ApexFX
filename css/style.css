@@ -738,7 +738,31 @@ button,input,select,textarea{ font:inherit; color:inherit; }
 @media (max-width: 860px){
   :root{ --pad: 16px; }
   .mobile-only{ display: inline-flex; }
-  .tb-search{ display:none; } /* like many mobile dashboards */
+  .tb-search{
+    display:flex;     /* ✅ show search */
+    margin: 0 8px;
+    flex:1;
+  }
+    .topbar {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  
+    .tb-title {
+      width: 100%;
+    }
+  
+    .tb-search {
+      width: 100%;
+    }
+  .tb-title h1{
+    font-size: 16px;   /* smaller only on mobile */
+    font-weight: 600;
+  }
+
+  .tb-title p{
+    font-size: 11px;   /* smaller date text */
+  }
   .main{ margin-left: 0; width: 100%; }
   .sidebar{
     transform: translateX(-105%);
@@ -759,23 +783,110 @@ button,input,select,textarea{ font:inherit; color:inherit; }
   }
 }
 
+/* =========================================
+   MOBILE CALENDAR FIX (7 columns + weekly row)
+   Desktop unchanged
+   Paste at END of style.css
+   ========================================= */
 @media (max-width: 520px){
-  .stat-value{ font-size: 32px; }
-  .chart-shell{ height: 240px; }
-  .cal-head, .cal-grid{ gap: 8px; }
-  .cal-cell,
-  .weekly-cell{
-    min-height: 56px;
-    padding: 6px;
+
+  /* Only when JS adds .cal-compact */
+  .cal-grid.cal-compact{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
   }
 
-  .cal-day{
+  /* Make weekday header 7 columns on mobile */
+  .cal-head.cal-head-compact{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+
+  /* Hide the "Weekly" header label on mobile */
+  .cal-head.cal-head-compact .cal-weekly-label{
+    display: none;
+  }
+
+  /* Smaller day cells to fit nicely */
+  .cal-grid.cal-compact .cal-cell{
+    min-height: 62px;
+    padding: 7px;
+    overflow: hidden;
+  }
+
+  .cal-grid.cal-compact .cal-day{
     font-size: 12px;
+    line-height: 1;
   }
 
-  .cal-pl{
+  /* P&L inside cell */
+  .cal-grid.cal-compact .cal-pl{
+    left: 7px;
+    right: 7px;
+    bottom: 7px;
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+  /* Weekly total row (full width) */
+  .wk-row{
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.06);
+    background: rgba(0,0,0,.20);
+    overflow: hidden;
+  }
+
+  .wk-row.profit{
+    background: rgba(0, 120, 70, 0.18);
+    border-color: rgba(0, 160, 90, 0.40);
+  }
+
+  .wk-row.loss{
+    background: rgba(120, 0, 0, 0.20);
+    border-color: rgba(200, 40, 40, 0.40);
+  }
+
+  .wk-left{
+    display:flex;
+    flex-direction:column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .wk-title2{
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: rgba(235,240,255,.55);
+    white-space: nowrap;
+  }
+
+  .wk-sub2{
+    font-size: 11px;
+    color: rgba(235,240,255,.50);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wk-val2{
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .wk-row.profit .wk-val2{ color: #00c27a; }
+  .wk-row.loss .wk-val2{ color: #ff4d4d; }
 }
 
 /* If bottom-nav ever becomes visible on wider screens (due to any override),
