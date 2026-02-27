@@ -8,6 +8,7 @@
   <meta name="theme-color" content="#05070b">
   <link rel="stylesheet" href="css/analysis.css" />
 </head>
+
 <body class="app">
   <div class="bg-glow"></div>
 
@@ -24,7 +25,7 @@
       </div>
 
       <div class="sb-user">
-        <div class="avatar" id="avatar">S</div>
+        <div class="avatar" id="avatar">U</div>
         <div class="sb-user-meta">
           <div class="sb-user-name" id="userName">User</div>
           <div class="sb-user-email" id="userEmail">email</div>
@@ -64,58 +65,37 @@
   <!-- Main -->
   <div class="main">
     <!-- Topbar -->
-    <header class="topbar">
-      <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
+<header class="topbar" id="topbar">
+  <button class="tb-icon mobile-only" id="menuBtn" aria-label="Open menu">☰</button>
 
-      <div class="tb-title">
-        <h1>Analysis</h1>
-        <p id="todayLabel">—</p>
-      </div>
-
-      <div class="tb-search">
-        <span class="tb-search-ico">⌕</span>
-        <input id="searchInput" type="text" placeholder="Search..." disabled />
-        <span class="tb-kbd">Ctrl+K</span>
-      </div>
-
-      <div class="tb-actions">
-        <div class="tb-avatar" id="topAvatar">S</div>
-        
-      </div>
-    </header>
+  <div class="tb-title">
+    <h1>Analysis</h1>
+    <p id="todayLabel">—</p>
+  </div>
+</header>
 
     <main class="content">
-      <section class="hero">
-        <div class="hero-left">
-          <div class="hero-kicker">
-            <span class="hero-ico">📈</span>
-            <div>
-              <h2>Performance Analytics</h2>
-              <p class="muted">Analyze your trading patterns and improve your strategy</p>
-            </div>
+
+      <!-- Controls -->
+      <section class="controls card">
+        <div class="group">
+          <div class="group-label muted">TIME PERIOD</div>
+          <div class="chips" id="timeChips">
+            <button class="chip" data-range="today">Today</button>
+            <button class="chip" data-range="7d">7 Days</button>
+            <button class="chip active" data-range="30d">30 Days</button>
+            <button class="chip" data-range="3m">3 Months</button>
+            <button class="chip" data-range="1y">1 Year</button>
+            <button class="chip" data-range="all">All Time</button>
           </div>
         </div>
 
-        <div class="hero-right">
-          <div class="group">
-            <div class="group-label muted">TIME PERIOD</div>
-            <div class="chips" id="timeChips">
-              <button class="chip" data-range="today">Today</button>
-              <button class="chip" data-range="7d">7 Days</button>
-              <button class="chip active" data-range="30d">30 Days</button>
-              <button class="chip" data-range="3m">3 Months</button>
-              <button class="chip" data-range="1y">1 Year</button>
-              <button class="chip" data-range="all">All Time</button>
-            </div>
-          </div>
-
-          <div class="group">
-            <div class="group-label muted">FILTER BY</div>
-            <div class="chips" id="filterChips">
-              <button class="chip active" data-filter="all">All Trades</button>
-              <button class="chip" data-filter="winners">Winners</button>
-              <button class="chip" data-filter="losers">Losers</button>
-            </div>
+        <div class="group">
+          <div class="group-label muted">FILTER BY</div>
+          <div class="chips" id="filterChips">
+            <button class="chip active" data-filter="all">All Trades</button>
+            <button class="chip" data-filter="winners">Winners</button>
+            <button class="chip" data-filter="losers">Losers</button>
           </div>
         </div>
       </section>
@@ -146,7 +126,7 @@
           </div>
           <div class="stat-label">PROFIT FACTOR</div>
           <div class="stat-value green" id="profitFactor">0.00</div>
-          <div class="stat-sub muted">Gross profit ÷ Gross loss (above 1.5 is good)</div>
+          <div class="stat-sub muted">Gross profit ÷ Gross loss</div>
         </div>
 
         <div class="card stat">
@@ -231,7 +211,6 @@
         </div>
       </section>
 
-      <!-- Long vs Short + Day Performance -->
       <section class="grid-2">
         <div class="card">
           <div class="card-head">
@@ -304,9 +283,7 @@
             </div>
           </div>
 
-          <div class="day-list" id="dayList">
-            <!-- JS renders rows -->
-          </div>
+          <div class="day-list" id="dayList"></div>
         </div>
       </section>
 
