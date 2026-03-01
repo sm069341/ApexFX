@@ -134,7 +134,11 @@ export default function TradeForm({ mode }: TradeFormProps) {
                         : "text-zinc-400 hover:bg-zinc-800/40",
                     ].join(" ")}
                   >
-                    <ArrowUpRight size={18} strokeWidth={2.8} className="opacity-90" />
+                    <ArrowUpRight
+                      size={18}
+                      strokeWidth={2.8}
+                      className="opacity-90"
+                    />
                     Long
                   </button>
 
@@ -148,7 +152,11 @@ export default function TradeForm({ mode }: TradeFormProps) {
                         : "text-zinc-400 hover:bg-zinc-800/40",
                     ].join(" ")}
                   >
-                    <ArrowDownRight size={18} strokeWidth={2.8} className="opacity-90" />
+                    <ArrowDownRight
+                      size={18}
+                      strokeWidth={2.8}
+                      className="opacity-90"
+                    />
                     Short
                   </button>
                 </div>
@@ -161,7 +169,9 @@ export default function TradeForm({ mode }: TradeFormProps) {
                   <input
                     value={symbol}
                     onChange={(e) =>
-                      setSymbol(e.target.value.toUpperCase().replace(/\s+/g, ""))
+                      setSymbol(
+                        e.target.value.toUpperCase().replace(/\s+/g, ""),
+                      )
                     }
                     placeholder="E.G. XAUUSD"
                     className={inputCls}
@@ -273,10 +283,17 @@ export default function TradeForm({ mode }: TradeFormProps) {
                       ].join(" ")}
                       title={`${pnlPreview >= 0 ? "+" : "-"}$${Math.abs(pnlPreview).toFixed(2)}`}
                     >
-                      {pnlPreview > 0 ? <BadgeCheck size={14} strokeWidth={2.6} /> : null}
-                      {pnlPreview < 0 ? <BadgeX size={14} strokeWidth={2.6} /> : null}
-                      {pnlPreview === 0 ? <MinusCircle size={14} strokeWidth={2.6} /> : null}
-                      {pnlPreview >= 0 ? "+" : "-"}${Math.abs(pnlPreview).toFixed(2)}
+                      {pnlPreview > 0 ? (
+                        <BadgeCheck size={14} strokeWidth={2.6} />
+                      ) : null}
+                      {pnlPreview < 0 ? (
+                        <BadgeX size={14} strokeWidth={2.6} />
+                      ) : null}
+                      {pnlPreview === 0 ? (
+                        <MinusCircle size={14} strokeWidth={2.6} />
+                      ) : null}
+                      {pnlPreview >= 0 ? "+" : "-"}$
+                      {Math.abs(pnlPreview).toFixed(2)}
                     </div>
                   </div>
 

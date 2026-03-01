@@ -21,7 +21,7 @@ import {
   Globe,
   ArrowUpDown,
 } from "lucide-react";
-import { Sigma, Scale, DollarSign , Target } from "lucide-react";
+import { Sigma, Scale, DollarSign, Target } from "lucide-react";
 
 /* =========================
   Helpers
@@ -133,7 +133,10 @@ export default function Analysis() {
       const q = query(collection(db, "trades"), where("uid", "==", user.uid));
       const snap = await getDocs(q);
 
-      const rows = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) })) as any[];
+      const rows = snap.docs.map((d) => ({
+        id: d.id,
+        ...(d.data() as any),
+      })) as any[];
 
       // sort newest -> oldest (for streaks & UI)
       rows.sort((a, b) => {
@@ -209,8 +212,12 @@ export default function Analysis() {
     const profitFactor = grossLoss === 0 ? Infinity : grossProfit / grossLoss;
     const expectancy = count ? total / count : 0;
 
-    const avgWinner = winners.length ? winners.reduce((a, b) => a + b, 0) / winners.length : 0;
-    const avgLoser = losers.length ? losers.reduce((a, b) => a + b, 0) / losers.length : 0;
+    const avgWinner = winners.length
+      ? winners.reduce((a, b) => a + b, 0) / winners.length
+      : 0;
+    const avgLoser = losers.length
+      ? losers.reduce((a, b) => a + b, 0) / losers.length
+      : 0;
 
     // streaks (use chronological)
     const chronological = [...rows].sort((a, b) => {
@@ -222,7 +229,10 @@ export default function Analysis() {
       return at - bt;
     });
 
-    let curWin = 0, curLoss = 0, bestWin = 0, bestLoss = 0;
+    let curWin = 0,
+      curLoss = 0,
+      bestWin = 0,
+      bestLoss = 0;
     for (const t of chronological) {
       const pnl = safeNum(t.pnl);
       if (pnl > 0) {
@@ -302,30 +312,30 @@ export default function Analysis() {
     };
   }, [filteredTrades]);
 
-const dayPerf = useMemo(() => {
-  // Mon..Sun
-  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  const sums = new Array(7).fill(0);
+  const dayPerf = useMemo(() => {
+    // Mon..Sun
+    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    const sums = new Array(7).fill(0);
 
-  for (const t of filteredTrades as any[]) {
-    const d = pickDate(t);
-    if (!d) continue;
-    const idx = (d.getDay() + 6) % 7; // monday=0
-    sums[idx] += safeNum(t.pnl);
-  }
+    for (const t of filteredTrades as any[]) {
+      const d = pickDate(t);
+      if (!d) continue;
+      const idx = (d.getDay() + 6) % 7; // monday=0
+      sums[idx] += safeNum(t.pnl);
+    }
 
-  const maxAbs = Math.max(1, ...sums.map((v) => Math.abs(v)));
+    const maxAbs = Math.max(1, ...sums.map((v) => Math.abs(v)));
 
-  return labels.map((label, i) => {
-    const value = sums[i];
-    const widthPct = (Math.abs(value) / maxAbs) * 100;
+    return labels.map((label, i) => {
+      const value = sums[i];
+      const widthPct = (Math.abs(value) / maxAbs) * 100;
 
-    const tone: "profit" | "loss" | "zero" =
-      value > 0 ? "profit" : value < 0 ? "loss" : "zero";
+      const tone: "profit" | "loss" | "zero" =
+        value > 0 ? "profit" : value < 0 ? "loss" : "zero";
 
-    return { label, value, widthPct, tone };
-  });
-}, [filteredTrades]);
+      return { label, value, widthPct, tone };
+    });
+  }, [filteredTrades]);
 
   const topSymbols = useMemo(() => {
     const map = new Map<string, { pnl: number; count: number; wins: number }>();
@@ -353,7 +363,11 @@ const dayPerf = useMemo(() => {
   }, [filteredTrades]);
 
   const sessionPerf = useMemo(() => {
-    const sessions: ("Asia" | "London" | "New York")[] = ["Asia", "London", "New York"];
+    const sessions: ("Asia" | "London" | "New York")[] = [
+      "Asia",
+      "London",
+      "New York",
+    ];
     const obj: Record<string, { pnl: number; count: number; wins: number }> = {
       Asia: { pnl: 0, count: 0, wins: 0 },
       London: { pnl: 0, count: 0, wins: 0 },
@@ -369,10 +383,7 @@ const dayPerf = useMemo(() => {
       if (pnl > 0) obj[s].wins += 1;
     }
 
-    const maxAbs = Math.max(
-      1,
-      ...sessions.map((s) => Math.abs(obj[s].pnl))
-    );
+    const maxAbs = Math.max(1, ...sessions.map((s) => Math.abs(obj[s].pnl)));
 
     return sessions.map((s) => ({
       name: s,
@@ -945,9 +956,13 @@ function Metric({
         </div>
       </div>
 
-      <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">{title}</div>
+      <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">
+        {title}
+      </div>
 
-      <div className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-blue-500">{value}</div>
+      <div className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-blue-500">
+        {value}
+      </div>
 
       <div className="mt-2 text-xs text-zinc-600">{sub}</div>
 
@@ -963,11 +978,26 @@ function Metric({
   );
 }
 
-function MiniStat({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
+function MiniStat({
+  label,
+  value,
+  danger,
+}: {
+  label: string;
+  value: string;
+  danger?: boolean;
+}) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4">
-      <div className="text-[11px] font-bold tracking-widest text-zinc-500">{label}</div>
-      <div className={["mt-2 text-xl font-bold", danger ? "text-rose-500" : "text-sky-500"].join(" ")}>
+      <div className="text-[11px] font-bold tracking-widest text-zinc-500">
+        {label}
+      </div>
+      <div
+        className={[
+          "mt-2 text-xl font-bold",
+          danger ? "text-rose-500" : "text-sky-500",
+        ].join(" ")}
+      >
         {value}
       </div>
     </div>
@@ -988,10 +1018,14 @@ function DirCard({
   const isLong = title === "Long";
 
   const leftLine = isLong ? "bg-blue-500" : "bg-rose-500";
-  const icon = isLong
-  ? <ArrowUpRight size={18} />
-  : <ArrowDownRight size={18} />;
-  const accentText = isLong ? "font-semibold text-blue-500" : "font-semibold text-blue-500";
+  const icon = isLong ? (
+    <ArrowUpRight size={18} />
+  ) : (
+    <ArrowDownRight size={18} />
+  );
+  const accentText = isLong
+    ? "font-semibold text-blue-500"
+    : "font-semibold text-blue-500";
   const accentBorder = isLong ? "border-emerald-500/25" : "border-rose-500/25";
 
   return (

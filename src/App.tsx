@@ -91,7 +91,9 @@ function Shell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-4 px-4 py-3">
               {/* Left: Title + date */}
               <div className="min-w-[220px]">
-                <div className="text-xl font-semibold leading-none">{title}</div>
+                <div className="text-xl font-semibold leading-none">
+                  {title}
+                </div>
                 <div className="mt-1 text-sm text-slate-500 dark:text-zinc-400">
                   {dateText}
                 </div>
@@ -124,7 +126,9 @@ function Shell({ children }: { children: React.ReactNode }) {
                         {(user?.email?.[0] || "S").toUpperCase()}
                       </span>
 
-                      <span className={`text-xs transition ${openMenu ? "rotate-180" : ""}`}>
+                      <span
+                        className={`text-xs transition ${openMenu ? "rotate-180" : ""}`}
+                      >
                         ▾
                       </span>
                     </button>
@@ -158,7 +162,11 @@ function Shell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between px-4 py-3">
               {/* Left: Logo + Title */}
               <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Logo" className="h-7 w-auto" />
+                <img
+                  src={`${import.meta.env.BASE_URL}logo.png`}
+                  alt="TradeXVault"
+                  className="h-9 w-auto drop-shadow-md"
+                />
                 <div className="text-lg font-semibold text-white">{title}</div>
               </div>
 
@@ -174,7 +182,9 @@ function Shell({ children }: { children: React.ReactNode }) {
                       {(user?.email?.[0] || "S").toUpperCase()}
                     </span>
 
-                    <span className={`text-xs transition ${openMenu ? "rotate-180" : ""}`}>
+                    <span
+                      className={`text-xs transition ${openMenu ? "rotate-180" : ""}`}
+                    >
                       ▾
                     </span>
                   </button>
@@ -215,7 +225,9 @@ function Shell({ children }: { children: React.ReactNode }) {
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuthState();
   if (loading)
-    return <div className="p-4 text-slate-500 dark:text-zinc-400">Loading...</div>;
+    return (
+      <div className="p-4 text-slate-500 dark:text-zinc-400">Loading...</div>
+    );
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }

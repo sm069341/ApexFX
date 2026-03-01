@@ -98,8 +98,12 @@ export default function AppSidebar() {
         <div className="flex h-full flex-col px-4 py-4 overflow-hidden">
           {/* Brand */}
           <div className="flex items-center gap-3 px-2 py-2">
-            <div className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-              <img src="/logo.png" alt="Logo" className="h-6 w-auto" />
+            <div className="grid h-10 w-10 place-items-center rounded-xl  bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+              <img
+                src={`${import.meta.env.BASE_URL}logo.png`}
+                alt="TradeXVault"
+                className="h-10 w-auto drop-shadow-md"
+              />
             </div>
             <div className="flex items-center gap-2">
               <div className="text-lg font-semibold text-slate-900 dark:text-white">
@@ -111,7 +115,7 @@ export default function AppSidebar() {
           {/* ===== User Card ===== */}
           <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4 shadow-lg">
             <div className="flex items-center gap-3">
-              <div className="relative grid h-12 w-12 place-items-center rounded-full bg-blue-600 text-white text-lg font-bold">
+              <div className="relative grid h-11 w-11 place-items-center rounded-full bg-blue-600 text-white text-xl font-bold">
                 {(user?.email?.[0] || "U").toUpperCase()}
                 <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-black" />
               </div>
