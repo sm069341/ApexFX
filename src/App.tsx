@@ -265,15 +265,7 @@ function AppRoutes() {
             path="/new"
             element={
               <PrivateRoute>
-                <TradeForm mode="create" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/edit/:id"
-            element={
-              <PrivateRoute>
-                <TradeForm mode="edit" />
+                <TradeForm />
               </PrivateRoute>
             }
           />
@@ -287,19 +279,7 @@ function AppRoutes() {
             path="/new"
             element={
               <PrivateRoute>
-                <Shell>
-                  <TradeForm mode="create" />
-                </Shell>
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/edit/:id"
-            element={
-              <PrivateRoute>
-                <Shell>
-                  <TradeForm mode="edit" />
-                </Shell>
+                <TradeForm />
               </PrivateRoute>
             }
           />

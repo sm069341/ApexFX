@@ -899,7 +899,15 @@ export default function Analysis() {
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-950/40 p-4 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+    <div
+      className={[
+        "rounded-3xl border border-white/10 bg-zinc-950/40 p-5",
+        "shadow-[0_20px_60px_rgba(0,0,0,0.45)]",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
+        "hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]",
+      ].join(" ")}
+    >
       {children}
     </div>
   );
@@ -945,56 +953,58 @@ function Metric({
   return (
     <div
       className={[
-        "rounded-3xl border p-5",
+        "group relative rounded-3xl border p-5",
         "border-white/10 bg-zinc-950/40",
         highlight ? "ring-1 ring-sky-500/20" : "",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
+        "hover:shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
       ].join(" ")}
     >
-      <div className="flex items-start justify-between">
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-500/10 text-sky-300">
-          <span className="text-xl">{icon}</span>
+      <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-70 [background:radial-gradient(70%_60%_at_20%_0%,rgba(59,130,246,0.16),transparent_60%)]" />
+
+      <div className="relative">
+        <div className="flex items-start justify-between">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-500/10 text-sky-300 transition-transform duration-300 group-hover:scale-[1.06]">
+            <span className="text-xl">{icon}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">
-        {title}
-      </div>
+        <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">{title}</div>
 
-      <div className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-blue-500">
-        {value}
-      </div>
-
-      <div className="mt-2 text-xs text-zinc-600">{sub}</div>
-
-      {typeof progress === "number" ? (
-        <div className="mt-4 h-2 w-full rounded-full bg-white/10">
-          <div
-            className="h-2 rounded-full bg-sky-500"
-            style={{ width: `${clamp(progress * 100, 0, 100)}%` }}
-          />
+        <div className="mt-2 text-4xl font-bold tracking-tight text-blue-500 transition-transform duration-300 group-hover:translate-y-[-1px]">
+          {value}
         </div>
-      ) : null}
+
+        <div className="mt-2 text-xs text-zinc-600">{sub}</div>
+
+        {typeof progress === "number" ? (
+          <div className="mt-4 h-2 w-full rounded-full bg-white/10 overflow-hidden">
+            <div
+              className="h-2 rounded-full bg-sky-500 transition-[width] duration-500 ease-out"
+              style={{ width: `${clamp(progress * 100, 0, 100)}%` }}
+            />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
 
-function MiniStat({
-  label,
-  value,
-  danger,
-}: {
-  label: string;
-  value: string;
-  danger?: boolean;
-}) {
+function MiniStat({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-3 sm:p-4">
-      <div className="text-[11px] font-bold tracking-widest text-zinc-500">
-        {label}
-      </div>
+    <div
+      className={[
+        "group rounded-2xl border border-white/10 bg-black/20 p-4",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-[1px] hover:bg-black/25 hover:border-white/15",
+      ].join(" ")}
+    >
+      <div className="text-[11px] font-bold tracking-widest text-zinc-500">{label}</div>
       <div
         className={[
-          "mt-2 text-xl font-bold",
+          "mt-2 text-xl font-bold tabular-nums",
+          "transition-transform duration-300 group-hover:translate-y-[-1px]",
           danger ? "text-rose-500" : "text-sky-500",
         ].join(" ")}
       >
@@ -1029,7 +1039,7 @@ function DirCard({
   const accentBorder = isLong ? "border-emerald-500/25" : "border-rose-500/25";
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-black/20">
+    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 transition-all duration-300 ease-out hover:-translate-y-[2px] hover:border-white/15 hover:bg-black/25 hover:shadow-[0_22px_60px_rgba(0,0,0,0.55)]">
       {/* LEFT COLOR LINE */}
       <div className={`absolute left-0 top-0 h-full w-1.5 ${leftLine}`} />
 

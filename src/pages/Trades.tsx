@@ -604,13 +604,7 @@ export default function Trades() {
                     {filtered.map((t: any) => (
                       <div
                         key={t.id}
-                        className="grid grid-cols-[160px_140px_120px_120px_140px_140px_140px_140px] items-center py-6 text-sm text-zinc-200 hover:bg-white/5 cursor-pointer"
-                        onClick={() =>
-                          navigate(`/edit/${t.id}`, {
-                            state: { backgroundLocation: location },
-                          })
-                        }
-                      >
+                        className="grid grid-cols-[160px_140px_120px_120px_140px_140px_140px_140px] items-center py-6 text-sm text-zinc-200 hover:bg-white/5 cursor-pointer">
                         <div className="px-2 whitespace-nowrap text-zinc-400">
                           {t.entryDate}
                         </div>

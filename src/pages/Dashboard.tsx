@@ -259,7 +259,15 @@ export default function Dashboard() {
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-w-0 rounded-3xl border border-white/10 bg-zinc-950/40 p-4 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+    <div
+      className={[
+        "rounded-3xl border border-white/10 bg-zinc-950/40 p-5",
+        "shadow-[0_20px_60px_rgba(0,0,0,0.45)]",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
+        "hover:shadow-[0_28px_80px_rgba(0,0,0,0.55)]",
+      ].join(" ")}
+    >
       {children}
     </div>
   );
@@ -287,44 +295,60 @@ function MetricCard({
   return (
     <div
       className={[
-        "rounded-3xl border p-5",
+        "group relative rounded-3xl border p-5",
         "bg-zinc-950/40 border-white/10",
         highlight ? "ring-1 ring-sky-500/15" : "",
-        "group",
+        "transition-all duration-300 ease-out",
+        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
+        "hover:shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
       ].join(" ")}
     >
-      <div className="flex items-start justify-between">
-        <div
-          className={[
-            "grid h-12 w-12 place-items-center rounded-2xl",
-            "transition-transform duration-200 group-hover:scale-[1.03]",
-            iconBg,
-          ].join(" ")}
-        >
-          <span className="block">{icon}</span>
-        </div>
-
-        {badge ? (
-          <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wide text-sky-200">
-            {badge}
-          </span>
-        ) : null}
-      </div>
-
-      <div className="mt-4 text-[10px] sm:text-[11px] font-semibold tracking-widest text-zinc-500">
-        {title}
-      </div>
-
+      {/* subtle hover glow */}
       <div
         className={[
-          "mt-2 text-2xl sm:text-4xl font-bold tracking-tight",
-          accent === "sky" ? "text-blue-500" : "text-white",
+          "pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300",
+          highlight ? "group-hover:opacity-100" : "group-hover:opacity-70",
+          "[background:radial-gradient(70%_60%_at_20%_0%,rgba(59,130,246,0.18),transparent_60%)]",
         ].join(" ")}
-      >
-        {value}
-      </div>
+      />
 
-      {sub ? <div className="mt-2 text-sm">{sub}</div> : null}
+      <div className="relative">
+        <div className="flex items-start justify-between">
+          <div
+            className={[
+              "grid h-12 w-12 place-items-center rounded-2xl",
+              "transition-transform duration-300 ease-out",
+              "group-hover:scale-[1.06]",
+              iconBg,
+            ].join(" ")}
+          >
+            <span className="text-xl">{icon}</span>
+          </div>
+
+          {badge ? (
+            <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wide text-sky-200">
+              {badge}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">
+          {title}
+        </div>
+
+        <div
+          className={[
+            "mt-2 text-4xl font-bold tracking-tight",
+            "transition-transform duration-300 ease-out",
+            "group-hover:translate-y-[-1px]",
+            accent === "sky" ? "text-blue-500" : "text-white",
+          ].join(" ")}
+        >
+          {value}
+        </div>
+
+        {sub ? <div className="mt-2 text-sm">{sub}</div> : null}
+      </div>
     </div>
   );
 }

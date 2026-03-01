@@ -1,24 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuthState } from "../hooks/useAuthState";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowUpRight,
-  ArrowDownRight,
-  CalendarDays,
-  Plus,
-  X,
-  BadgeCheck,
-  BadgeX,
-  MinusCircle,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, Calendar, TrendingUp, TrendingDown } from "lucide-react";
 
-type TradeFormProps = {
-  mode: "create" | "edit";
-};
-
-export default function TradeForm({ mode }: TradeFormProps) {
+export default function TradeForm() {
   const { user } = useAuthState();
   const navigate = useNavigate();
 
@@ -35,22 +22,20 @@ export default function TradeForm({ mode }: TradeFormProps) {
   const [tags, setTags] = useState("");
   const [notes, setNotes] = useState("");
 
+  // ✅ new states
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [successSymbol, setSuccessSymbol] = useState("");
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Premium preview (what will be saved)
-  const pnlPreview = useMemo(() => {
-    const raw = Number(pnl || 0);
-    if (!Number.isFinite(raw)) return 0;
-    if (result === "WIN") return Math.abs(raw);
-    if (result === "LOSS") return -Math.abs(raw);
-    return 0;
-  }, [pnl, result]);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user) return;
+    if (!user || saving) return;
+
+    setSaving(true);
 
     const rawPnl = Number(pnl || 0);
     const normalizedPnl =
@@ -60,53 +45,102 @@ export default function TradeForm({ mode }: TradeFormProps) {
           ? -Math.abs(rawPnl)
           : 0;
 
-    await addDoc(collection(db, "trades"), {
-      uid: user.uid,
+    // normalize symbol for message (keep stored symbol as typed)
+    const symForMsg = (symbol || "Trade").toUpperCase().trim() || "Trade";
 
-      // ✅ consistent names everywhere
-      side: side === "LONG" ? "BUY" : "SELL",
-      entryDate: date, // YYYY-MM-DD
+    try {
+      await addDoc(collection(db, "trades"), {
+        uid: user.uid,
 
-      session,
-      symbol: (symbol || "").toUpperCase().replace(/\s+/g, ""),
-      quantity: Number(quantity),
-      entryPrice: Number(entryPrice),
-      exitPrice: Number(exitPrice),
+        side: side === "LONG" ? "BUY" : "SELL",
+        entryDate: date,
 
-      result,
-      pnl: normalizedPnl,
-      equityAfter: Number(equityAfter),
+        session,
+        symbol,
+        quantity: Number(quantity),
+        entryPrice: Number(entryPrice),
+        exitPrice: Number(exitPrice),
 
-      tags: tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-      notes,
+        result,
+        pnl: normalizedPnl,
+        equityAfter: Number(equityAfter),
 
-      createdAt: Timestamp.now(),
-    });
+        tags: tags.split(",").map((t) => t.trim()),
+        notes,
 
-    navigate("/");
+        createdAt: Timestamp.now(),
+      });
+
+      // ✅ success overlay
+      setSuccessSymbol(symForMsg);
+      setSuccess(true);
+
+      // ✅ smooth auto close
+      setTimeout(() => {
+        navigate(-1);
+      }, 1100);
+    } catch (err) {
+      console.error("Add trade failed:", err);
+      alert("Failed to save trade. Check console (F12).");
+      setSaving(false);
+      setSuccess(false);
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm px-4 py-8">
       <div className="min-h-full flex items-center justify-center">
-        <div className="relative w-full max-w-3xl overflow-hidden rounded-[28px] border border-white/10 bg-zinc-950/60 shadow-[0_30px_100px_rgba(0,0,0,0.75)]">
+        <div className="relative w-full max-w-3xl overflow-hidden rounded-[32px] border border-white/10 bg-zinc-950/60 shadow-[0_30px_100px_rgba(0,0,0,0.75)]">
           {/* soft glow */}
-          <div className="pointer-events-none absolute inset-0 opacity-60 [background:radial-gradient(60%_60%_at_20%_0%,rgba(59,130,246,0.20),transparent_60%),radial-gradient(55%_55%_at_90%_0%,rgba(255,255,255,0.06),transparent_55%)]" />
+          <div className="pointer-events-none absolute inset-0 z-0 opacity-70 animate-[pulse_3.5s_ease-in-out_infinite] [background:radial-gradient(60%_60%_at_20%_0%,rgba(59,130,246,0.22),transparent_60%),radial-gradient(55%_55%_at_90%_0%,rgba(255,255,255,0.08),transparent_55%)]" />
+          <div className="pointer-events-none absolute inset-0 z-0 opacity-[0.10] [background-image:radial-gradient(rgba(255,255,255,0.65)_1px,transparent_1px)] [background-size:18px_18px]" />
 
-          <div className="relative p-5 sm:p-6 md:p-8">
-            {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="grid h-11 w-11 sm:h-12 sm:w-12 place-items-center rounded-2xl bg-sky-600/15 text-sky-300">
-                  <Plus size={22} strokeWidth={2.8} />
+          {/* ✅ success overlay */}
+          {success && (
+            <div className="absolute inset-0 z-20 rounded-[32px] border border-emerald-500/20 bg-zinc-950/55 backdrop-blur-sm">
+              <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-300 animate-[softPop_.25s_ease-out]">
+                  {/* check icon */}
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    className="stroke-current"
+                  >
+                    <path
+                      d="M20 6L9 17l-5-5"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </div>
 
+                <div className="mt-4 text-xl font-semibold text-white animate-[fadeUp_.25s_ease-out]">
+                  {successSymbol} added successfully ✅
+                </div>
+                <div className="mt-1 text-sm text-zinc-400 animate-[fadeUp_.25s_ease-out]">
+                  Updating your journal…
+                </div>
+
+                <div className="mt-5 h-1.5 w-full max-w-[260px] overflow-hidden rounded-full bg-white/10">
+                  <div className="h-full w-full origin-left animate-[progress_1.1s_ease-out_forwards] rounded-full bg-emerald-500/70" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="relative p-6 md:p-8">
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-600/15 text-sky-300 transition-all duration-300 hover:scale-105 hover:bg-sky-600/20 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] animate-[softPop_.35s_ease-out]">
+                  <Sparkles size={26} strokeWidth={2.5} />
+                </div>
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-semibold text-white">
-                    {mode === "edit" ? "Edit Trade" : "Add Trade"}
+                  <h2 className="text-2xl font-semibold text-white">
+                    Add Trade
                   </h2>
                 </div>
               </div>
@@ -115,8 +149,9 @@ export default function TradeForm({ mode }: TradeFormProps) {
                 onClick={() => navigate(-1)}
                 className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10"
                 aria-label="Close"
+                disabled={saving}
               >
-                <X size={18} strokeWidth={2.8} />
+                ✕
               </button>
             </div>
 
@@ -124,120 +159,142 @@ export default function TradeForm({ mode }: TradeFormProps) {
               {/* Long / Short segmented control */}
               <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-1">
                 <div className="grid grid-cols-2 gap-1">
+                  {/* LONG */}
                   <button
                     type="button"
                     onClick={() => setSide("LONG")}
+                    disabled={saving}
                     className={[
-                      "flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition",
+                      "group relative flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold",
+                      "transition-all duration-300 ease-out",
                       side === "LONG"
-                        ? "bg-blue-600/25 text-blue-300 shadow-[0_0_20px_rgba(37,99,235,0.35)] border border-blue-500/30"
+                        ? "bg-emerald-600/15 text-emerald-200 border border-emerald-500/35"
                         : "text-zinc-400 hover:bg-zinc-800/40",
+                      saving ? "opacity-70" : "",
                     ].join(" ")}
                   >
-                    <ArrowUpRight
-                      size={18}
-                      strokeWidth={2.8}
-                      className="opacity-90"
-                    />
-                    Long
+                    {/* subtle pulse glow when active */}
+                    {side === "LONG" && (
+                      <span className="pointer-events-none absolute inset-0 rounded-2xl animate-[glowGreen_2.2s_ease-in-out_infinite]" />
+                    )}
+
+                    <span className="relative z-10 flex items-center gap-2">
+                      <TrendingUp
+                        size={18}
+                        strokeWidth={2.6}
+                        className={[
+                          "transition-transform duration-300",
+                          side === "LONG"
+                            ? "animate-[arrowNudgeUp_.9s_ease-in-out_infinite]"
+                            : "group-hover:-translate-y-[1px]",
+                        ].join(" ")}
+                      />
+                      <span>Long</span>
+                    </span>
                   </button>
 
+                  {/* SHORT */}
                   <button
                     type="button"
                     onClick={() => setSide("SHORT")}
+                    disabled={saving}
                     className={[
-                      "flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold transition",
+                      "group relative flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold",
+                      "transition-all duration-300 ease-out",
                       side === "SHORT"
-                        ? "bg-rose-600/20 text-rose-300 border border-rose-500/40 shadow-[0_0_25px_rgba(244,63,94,0.25)]"
+                        ? "bg-rose-600/15 text-rose-200 border border-rose-500/35"
                         : "text-zinc-400 hover:bg-zinc-800/40",
+                      saving ? "opacity-70" : "",
                     ].join(" ")}
                   >
-                    <ArrowDownRight
-                      size={18}
-                      strokeWidth={2.8}
-                      className="opacity-90"
-                    />
-                    Short
+                    {/* subtle pulse glow when active */}
+                    {side === "SHORT" && (
+                      <span className="pointer-events-none absolute inset-0 rounded-2xl animate-[glowRed_2.2s_ease-in-out_infinite]" />
+                    )}
+
+                    <span className="relative z-10 flex items-center gap-2">
+                      <TrendingDown
+                        size={18}
+                        strokeWidth={2.6}
+                        className={[
+                          "transition-transform duration-300",
+                          side === "SHORT"
+                            ? "animate-[arrowNudgeDown_.9s_ease-in-out_infinite]"
+                            : "group-hover:translate-y-[1px]",
+                        ].join(" ")}
+                      />
+                      <span>Short</span>
+                    </span>
                   </button>
                 </div>
               </div>
 
               {/* Fields */}
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* SYMBOL */}
                 <Field label="SYMBOL">
                   <input
                     value={symbol}
-                    onChange={(e) =>
-                      setSymbol(
-                        e.target.value.toUpperCase().replace(/\s+/g, ""),
-                      )
-                    }
+                    onChange={(e) => setSymbol(e.target.value)}
                     placeholder="E.G. XAUUSD"
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* QUANTITY */}
                 <Field label="QUANTITY">
                   <input
                     type="number"
-                    inputMode="decimal"
-                    step="0.01"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     placeholder="Lots"
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* ENTRY PRICE */}
                 <Field label="ENTRY PRICE">
                   <input
                     type="number"
-                    inputMode="decimal"
-                    step="0.00001"
                     value={entryPrice}
                     onChange={(e) => setEntryPrice(e.target.value)}
                     placeholder="0.00"
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* EXIT PRICE */}
                 <Field label="EXIT PRICE">
                   <input
                     type="number"
-                    inputMode="decimal"
-                    step="0.00001"
                     value={exitPrice}
                     onChange={(e) => setExitPrice(e.target.value)}
                     placeholder="Optional"
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* ENTRY DATE */}
                 <Field label="ENTRY DATE">
-                  <div className="relative">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500">
-                      <CalendarDays size={18} strokeWidth={2.6} />
+                  <div className="relative group">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 transition-all duration-200 group-focus-within:text-sky-400 group-focus-within:scale-105">
+                      <Calendar size={18} strokeWidth={2.2} />
                     </span>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                       className={[inputCls, "pl-10"].join(" ")}
+                      disabled={saving}
                     />
                   </div>
                 </Field>
 
-                {/* Session */}
                 <Field label="SESSION">
                   <select
                     value={session}
                     onChange={(e) => setSession(e.target.value)}
                     className={`${inputCls} appearance-none text-white`}
+                    disabled={saving}
                   >
                     <option className="bg-zinc-900 text-white">Asia</option>
                     <option className="bg-zinc-900 text-white">London</option>
@@ -245,14 +302,14 @@ export default function TradeForm({ mode }: TradeFormProps) {
                   </select>
                 </Field>
 
-                {/* Result + PnL */}
                 <Field label="RESULT" className="md:col-span-2">
                   <div className="flex flex-wrap gap-2">
-                    {(["WIN", "LOSS", "BE"] as const).map((r) => (
+                    {["WIN", "LOSS", "BE"].map((r) => (
                       <button
                         key={r}
                         type="button"
-                        onClick={() => setResult(r)}
+                        onClick={() => setResult(r as any)}
+                        disabled={saving}
                         className={[
                           "rounded-2xl px-4 py-2 text-sm font-semibold transition",
                           result === r
@@ -262,6 +319,7 @@ export default function TradeForm({ mode }: TradeFormProps) {
                                 ? "bg-rose-600/20 text-rose-300 border border-rose-500/40 shadow-[0_0_20px_rgba(244,63,94,0.25)]"
                                 : "bg-slate-600/30 text-slate-200 border border-slate-400/40"
                             : "bg-white/5 text-zinc-400 hover:bg-white/10",
+                          saving ? "opacity-70" : "",
                         ].join(" ")}
                       >
                         {r}
@@ -269,72 +327,41 @@ export default function TradeForm({ mode }: TradeFormProps) {
                     ))}
                   </div>
 
-                  {/* premium preview chip */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="text-xs text-zinc-500">Preview:</div>
-                    <div
-                      className={[
-                        "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold tabular-nums",
-                        pnlPreview > 0
-                          ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
-                          : pnlPreview < 0
-                            ? "border-rose-500/25 bg-rose-500/10 text-rose-300"
-                            : "border-slate-400/20 bg-white/5 text-zinc-300",
-                      ].join(" ")}
-                      title={`${pnlPreview >= 0 ? "+" : "-"}$${Math.abs(pnlPreview).toFixed(2)}`}
-                    >
-                      {pnlPreview > 0 ? (
-                        <BadgeCheck size={14} strokeWidth={2.6} />
-                      ) : null}
-                      {pnlPreview < 0 ? (
-                        <BadgeX size={14} strokeWidth={2.6} />
-                      ) : null}
-                      {pnlPreview === 0 ? (
-                        <MinusCircle size={14} strokeWidth={2.6} />
-                      ) : null}
-                      {pnlPreview >= 0 ? "+" : "-"}$
-                      {Math.abs(pnlPreview).toFixed(2)}
-                    </div>
-                  </div>
-
                   <input
                     type="number"
-                    inputMode="decimal"
-                    step="0.01"
                     placeholder="Enter PnL"
                     value={pnl}
                     onChange={(e) => setPnl(e.target.value)}
                     className={["mt-3", inputCls].join(" ")}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* Equity */}
                 <Field label="EQUITY AFTER TRADE" className="md:col-span-2">
                   <input
                     type="number"
-                    inputMode="decimal"
-                    step="0.01"
                     value={equityAfter}
                     onChange={(e) => setEquityAfter(e.target.value)}
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* Tags */}
                 <Field label="TAGS" className="md:col-span-2">
                   <input
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
                     placeholder="Breakout, NY session, Gold"
                     className={inputCls}
+                    disabled={saving}
                   />
                 </Field>
 
-                {/* Pre-Trade checklist (visual only) */}
                 <div className="md:col-span-2">
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-4 text-sm text-zinc-400 hover:bg-white/5"
+                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-zinc-400 hover:bg-white/5"
+                    disabled={saving}
                   >
                     <span className="flex items-center gap-3">
                       <span className="text-zinc-500">›</span>
@@ -344,7 +371,6 @@ export default function TradeForm({ mode }: TradeFormProps) {
                   </button>
                 </div>
 
-                {/* Notes */}
                 <Field label="NOTES" className="md:col-span-2">
                   <textarea
                     rows={4}
@@ -352,24 +378,40 @@ export default function TradeForm({ mode }: TradeFormProps) {
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Trade rationale, entry/exit notes..."
                     className={[inputCls, "resize-none py-3"].join(" ")}
+                    disabled={saving}
                   />
                 </Field>
               </div>
 
               {/* Footer buttons */}
-              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="mt-7 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => navigate(-1)}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-zinc-300 hover:bg-white/10"
+                  disabled={saving}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-zinc-300 hover:bg-white/10 disabled:opacity-60"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="rounded-2xl bg-blue-600 px-7 py-3 text-sm font-semibold text-white hover:bg-blue-500"
+                  disabled={saving || success}
+                  className={[
+                    "rounded-2xl px-7 py-3 text-sm font-semibold transition-all duration-300 ease-out",
+                    saving || success
+                      ? "bg-zinc-700 text-zinc-300 cursor-not-allowed"
+                      : "bg-blue-600 text-white hover:bg-blue-500 hover:-translate-y-[1px] hover:shadow-lg active:scale-[0.98]",
+                  ].join(" ")}
                 >
-                  Save Trade
+                  {saving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
+                      Saving…
+                    </span>
+                  ) : (
+                    "Save Trade"
+                  )}
                 </button>
               </div>
             </form>
@@ -381,11 +423,11 @@ export default function TradeForm({ mode }: TradeFormProps) {
 }
 
 /* =========================
-   Small UI helpers (only UI)
+   Small UI helpers
 ========================= */
 
 const inputCls =
-  "mt-1 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-white/20";
+  "mt-1 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-white/20 disabled:opacity-60";
 
 function Field({
   label,
