@@ -4,7 +4,7 @@ import { db } from "../firebase";
 import { useAuthState } from "../hooks/useAuthState";
 import type { Trade } from "../types";
 import { money } from "../lib/format";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowUpRight, ArrowDownRight, History } from "lucide-react";
 
 /* ---------- helpers ---------- */
@@ -50,7 +50,6 @@ export default function Trades() {
   const [loading, setLoading] = useState(true);
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const navigate = useNavigate();
   const location = useLocation();
 
   /* ---------- filters (working) ---------- */
