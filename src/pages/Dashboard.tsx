@@ -86,6 +86,7 @@ export default function Dashboard() {
           title="TOTAL P&L"
           badge="TOTAL"
           iconBg="bg-sky-500/15"
+          tone="blue"
           icon={
             <DollarSign
               size={30}
@@ -102,6 +103,7 @@ export default function Dashboard() {
         <MetricCard
           title="UNREALIZED"
           iconBg="bg-amber-500/15"
+          tone="amber"
           icon={
             <Clock size={30} strokeWidth={2.5} className="text-amber-300" />
           }
@@ -112,6 +114,7 @@ export default function Dashboard() {
         <MetricCard
           title="REALIZED"
           iconBg="bg-sky-500/15"
+          tone="green"
           icon={
             <CheckCircle2
               size={30}
@@ -129,6 +132,7 @@ export default function Dashboard() {
         <MetricCard
           title="WIN RATE"
           iconBg="bg-indigo-500/15"
+          tone="rose"
           icon={
             <Target size={30} strokeWidth={2.5} className="text-indigo-500" />
           }
@@ -282,6 +286,7 @@ function MetricCard({
   sub,
   accent,
   highlight,
+  tone,
 }: {
   title: string;
   badge?: string;
@@ -291,16 +296,36 @@ function MetricCard({
   sub?: React.ReactNode;
   accent?: "sky";
   highlight?: boolean;
+  tone?: "blue" | "green" | "amber" | "rose";
 }) {
+  const toneStyles = {
+    blue: {
+      glow: "shadow-[0_20px_70px_rgba(59,130,246,0.18)]",
+      surface: "bg-gradient-to-b from-blue-800/[0.07] to-zinc-950/40",
+    },
+    green: {
+      glow: "shadow-[0_20px_70px_rgba(16,185,129,0.18)]",
+      surface: "bg-gradient-to-b from-emerald-800/[0.07] to-zinc-950/40",
+    },
+    amber: {
+      glow: "shadow-[0_20px_70px_rgba(245,158,11,0.18)]",
+      surface: "bg-gradient-to-b from-amber-800/[0.07] to-zinc-950/40",
+    },
+    rose: {
+      glow: "shadow-[0_20px_70px_rgba(244,63,94,0.18)]",
+      surface: "bg-gradient-to-b from-rose-800/[0.07] to-zinc-950/40",
+    },
+  };
+
+  const currentTone = tone ? toneStyles[tone] : null;
   return (
     <div
       className={[
-        "group relative rounded-3xl border p-5",
-        "bg-zinc-950/40 border-white/10",
+        "rounded-3xl border p-5 border-white/10 transition-all duration-300",
+        currentTone?.surface ?? "bg-zinc-950/40",
+        currentTone?.glow ?? "shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
+        "hover:-translate-y-1 hover:border-white/15",
         highlight ? "ring-1 ring-sky-500/15" : "",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
-        "hover:shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
       ].join(" ")}
     >
       {/* subtle hover glow */}
@@ -338,7 +363,7 @@ function MetricCard({
 
         <div
           className={[
-            "mt-2 text-4xl font-bold tracking-tight",
+            "mt-2 text-3xl sm:text-4xl font-bold tracking-tight",
             "transition-transform duration-300 ease-out",
             "group-hover:translate-y-[-1px]",
             accent === "sky" ? "text-blue-500" : "text-white",
@@ -347,7 +372,7 @@ function MetricCard({
           {value}
         </div>
 
-        {sub ? <div className="mt-2 text-sm">{sub}</div> : null}
+        {sub ? <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div> : null}
       </div>
     </div>
   );

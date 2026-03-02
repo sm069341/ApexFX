@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuthState } from "../hooks/useAuthState";
+import { money } from "../lib/format";
 import type { Trade } from "../types";
 import {
   ResponsiveContainer,
@@ -122,6 +123,16 @@ export default function Analysis() {
 
   const [period, setPeriod] = useState<PeriodKey>("30d");
   const [resultFilter, setResultFilter] = useState<ResultFilter>("all");
+  const totalPL = useMemo(() => {
+    return trades.reduce((sum: number, t: any) => sum + Number(t.pnl ?? 0), 0);
+  }, [trades]);
+
+  const winRate = useMemo(() => {
+    const closed = trades.length;
+    if (!closed) return 0;
+    const wins = trades.filter((t: any) => Number(t.pnl ?? 0) > 0).length;
+    return wins / closed;
+  }, [trades]);
 
   useEffect(() => {
     let alive = true;
@@ -469,31 +480,47 @@ export default function Analysis() {
       </div>
 
       {/* ===== Top 4 metric cards ===== */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric
           title="TOTAL P&L"
+          badge="TOTAL"
+          iconBg="bg-sky-500/15"
+          tone="blue"
           icon={
             <DollarSign
               size={30}
               strokeWidth={2.5}
-              className="text-emerald-300"
+              className={totalPL >= 0 ? "text-emerald-300" : "text-rose-300"}
             />
           }
-          value={formatK(stats.total)}
-          sub={`From ${stats.count} closed trades`}
+          value={`${totalPL >= 0 ? "+" : "-"}${money(Math.abs(totalPL))}`}
+          sub={<span className="text-sky-400">→ {trades.length} trades</span>}
+          accent="sky"
           highlight
         />
         <Metric
           title="WIN RATE"
+          iconBg="bg-indigo-500/15"
+          tone="rose"
           icon={
             <Target size={30} strokeWidth={2.5} className="text-indigo-500" />
           }
-          value={`${(stats.winRate * 100).toFixed(1)}%`}
-          sub={`${stats.wins} wins • ${stats.losses} losses`}
-          progress={stats.winRate}
+          value={`${Math.round(winRate * 100)}%`}
+          sub={
+            <div className="mt-3 h-2 w-full rounded-full bg-white/10">
+              <div
+                className="h-2 rounded-full bg-sky-500"
+                style={{
+                  width: `${Math.max(0, Math.min(100, winRate * 100))}%`,
+                }}
+              />
+            </div>
+          }
         />
         <Metric
           title="PROFIT FACTOR"
+          iconBg="bg-sky-500/15"
+          tone="green"
           icon={<Scale size={30} strokeWidth={2.5} className="text-sky-400" />}
           value={
             Number.isFinite(stats.profitFactor)
@@ -501,9 +528,12 @@ export default function Analysis() {
               : "Infinity"
           }
           sub="Gross profit ÷ Gross loss (above 1.5 is good)"
+          accent="sky"
         />
         <Metric
           title="EXPECTANCY"
+          iconBg="bg-amber-500/15"
+          tone="amber"
           icon={<Sigma size={20} strokeWidth={2.6} className="text-sky-400" />}
           value={formatK(stats.expectancy)}
           sub="Average per trade"
@@ -857,14 +887,30 @@ export default function Analysis() {
                   </div>
                 </div>
 
-                <div className="text-sm font-semibold text-sky-400">
+                <div
+                  className={[
+                    "text-x font-semibold transition-colors duration-300",
+                    s.pnl > 0
+                      ? "text-green-400"
+                      : s.pnl < 0
+                        ? "text-rose-400"
+                        : "text-sky-400",
+                  ].join(" ")}
+                >
                   {formatK(s.pnl)}
                 </div>
               </div>
 
               <div className="mt-4 h-2 rounded-full bg-white/10">
                 <div
-                  className="h-2 rounded-full bg-sky-500"
+                  className={[
+                    "h-2 rounded-full transition-all duration-300",
+                    s.pnl > 0
+                      ? "bg-green-500"
+                      : s.pnl < 0
+                        ? "bg-rose-500"
+                        : "bg-sky-500",
+                  ].join(" ")}
                   style={{ width: `${clamp(s.barPct, 2, 100)}%` }}
                 />
               </div>
@@ -880,7 +926,7 @@ export default function Analysis() {
                   <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
                     WIN RATE
                   </div>
-                  <div className="mt-1 font-semibold text-sky-400">
+                  <div className="mt-1 text-[18px] font-bold text-blue-500">
                     {s.count ? `${(s.winRate * 100).toFixed(1)}%` : "—"}
                   </div>
                 </div>
@@ -937,46 +983,102 @@ function Pill({
 
 function Metric({
   title,
+  badge,
   icon,
+  iconBg,
   value,
   sub,
+  accent,
   highlight,
   progress,
+  tone,
 }: {
   title: string;
+  badge?: string;
   icon: React.ReactNode;
+  iconBg: string;
   value: string;
-  sub: string;
+  sub?: React.ReactNode;
+  accent?: "sky";
   highlight?: boolean;
-  progress?: number; // 0..1
+  progress?: number;
+  tone?: "blue" | "green" | "amber" | "rose";
 }) {
+    const toneStyles = {
+    blue: {
+      glow: "shadow-[0_20px_70px_rgba(59,130,246,0.18)]",
+      surface: "bg-gradient-to-b from-blue-800/[0.07] to-zinc-950/40",
+    },
+    green: {
+      glow: "shadow-[0_20px_70px_rgba(16,185,129,0.18)]",
+      surface: "bg-gradient-to-b from-emerald-800/[0.07] to-zinc-950/40",
+    },
+    amber: {
+      glow: "shadow-[0_20px_70px_rgba(245,158,11,0.18)]",
+      surface: "bg-gradient-to-b from-amber-800/[0.07] to-zinc-950/40",
+    },
+    rose: {
+      glow: "shadow-[0_20px_70px_rgba(244,63,94,0.18)]",
+      surface: "bg-gradient-to-b from-rose-800/[0.07] to-zinc-950/40",
+    },
+  };
+
+  const currentTone = tone ? toneStyles[tone] : null;
   return (
     <div
       className={[
-        "group relative rounded-3xl border p-5",
-        "border-white/10 bg-zinc-950/40",
-        highlight ? "ring-1 ring-sky-500/20" : "",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
-        "hover:shadow-[0_24px_70px_rgba(0,0,0,0.55)]",
+        "rounded-3xl border p-5 border-white/10 transition-all duration-300",
+        currentTone?.surface ?? "bg-zinc-950/40",
+        currentTone?.glow ?? "shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
+        "hover:-translate-y-1 hover:border-white/15",
+        highlight ? "ring-1 ring-sky-500/15" : "",
       ].join(" ")}
     >
-      <div className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-70 [background:radial-gradient(70%_60%_at_20%_0%,rgba(59,130,246,0.16),transparent_60%)]" />
+            {/* subtle hover glow */}
+      <div
+        className={[
+          "pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300",
+          highlight ? "group-hover:opacity-100" : "group-hover:opacity-70",
+          "[background:radial-gradient(70%_60%_at_20%_0%,rgba(59,130,246,0.18),transparent_60%)]",
+        ].join(" ")}
+      />
 
       <div className="relative">
         <div className="flex items-start justify-between">
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-500/10 text-sky-300 transition-transform duration-300 group-hover:scale-[1.06]">
+          <div
+            className={[
+              "grid h-12 w-12 place-items-center rounded-2xl",
+              "transition-transform duration-300 ease-out",
+              "group-hover:scale-[1.06]",
+              iconBg,
+            ].join(" ")}
+          >
             <span className="text-xl">{icon}</span>
           </div>
+
+          {badge ? (
+            <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wide text-sky-200">
+              {badge}
+            </span>
+          ) : null}
         </div>
 
-        <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">{title}</div>
+        <div className="mt-4 text-[11px] font-semibold tracking-widest text-zinc-500">
+          {title}
+        </div>
 
-        <div className="mt-2 text-4xl font-bold tracking-tight text-blue-500 transition-transform duration-300 group-hover:translate-y-[-1px]">
+        <div
+          className={[
+            "mt-2 text-3xl sm:text-4xl font-bold tracking-tight",
+            "transition-transform duration-300 ease-out",
+            "group-hover:translate-y-[-1px]",
+            accent === "sky" ? "text-blue-500" : "text-white",
+          ].join(" ")}
+        >
           {value}
         </div>
 
-        <div className="mt-2 text-xs text-zinc-600">{sub}</div>
+        {sub ? <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div> : null}
 
         {typeof progress === "number" ? (
           <div className="mt-4 h-2 w-full rounded-full bg-white/10 overflow-hidden">
