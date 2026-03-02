@@ -895,12 +895,12 @@ export default function Analysis() {
 
                 <div
                   className={[
-                    "text-x font-bold transition-colors duration-300",
+                    "text-x sm:text-[17px] font-bold transition-colors duration-300",
                     s.pnl > 0
-                      ? "text-green-400"
+                      ? "text-emerald-500"
                       : s.pnl < 0
-                        ? "text-rose-400"
-                        : "text-sky-400",
+                        ? "text-rose-500"
+                        : "text-emerald-500",
                   ].join(" ")}
                 >
                   {formatK(s.pnl)}
@@ -912,10 +912,10 @@ export default function Analysis() {
                   className={[
                     "h-2 rounded-full transition-all duration-300",
                     s.pnl > 0
-                      ? "bg-emerald-500"
+                      ? "bg-blue-500"
                       : s.pnl < 0
                         ? "bg-rose-500"
-                        : "bg-emerald-500",
+                        : "bg-blue-500",
                   ].join(" ")}
                   style={{ width: `${clamp(s.barPct, 2, 100)}%` }}
                 />
@@ -954,7 +954,7 @@ export default function Analysis() {
                   <div className="text-[9px] sm:text-[11px] font-semibold tracking-widest text-zinc-500">
                     WIN RATE
                   </div>
-                  <div className="mt-1 text-[17px] font-bold text-sky-400">
+                  <div className="mt-1 text-[17px] font-bold text-blue-500">
                     {s.count ? `${(s.winRate * 100).toFixed(1)}%` : "—"}
                   </div>
                 </div>
