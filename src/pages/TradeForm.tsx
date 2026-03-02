@@ -416,7 +416,7 @@ export default function TradeForm() {
                   />
                 </Field>
 
-                <div className="md:col-span-2">
+                {/* <div className="md:col-span-2">
                   <button
                     type="button"
                     className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-zinc-400 hover:bg-white/5"
@@ -428,7 +428,7 @@ export default function TradeForm() {
                     </span>
                     <span className="text-zinc-600"> </span>
                   </button>
-                </div>
+                </div> */}
 
                 <Field label="NOTES" className="md:col-span-2">
                   <textarea
