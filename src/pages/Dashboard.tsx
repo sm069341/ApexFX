@@ -109,9 +109,7 @@ export default function Dashboard() {
           title="UNREALIZED"
           iconBg="bg-amber-500/15"
           tone="amber"
-          icon={
-            <Clock size={30} strokeWidth={2.5} className="text-amber-300" />
-          }
+          icon={<Clock size={30} strokeWidth={2.5} className="text-amber-300" />}
           value={`${unrealized >= 0 ? "+" : "-"}${money(Math.abs(unrealized))}`}
           sub={<span className="text-zinc-500">0 open positions</span>}
         />
@@ -138,9 +136,7 @@ export default function Dashboard() {
           title="WIN RATE"
           iconBg="bg-indigo-500/15"
           tone="rose"
-          icon={
-            <Target size={30} strokeWidth={2.5} className="text-indigo-500" />
-          }
+          icon={<Target size={30} strokeWidth={2.5} className="text-indigo-500" />}
           value={`${Math.round(winRate * 100)}%`}
           sub={
             <div className="mt-3 h-2 w-full rounded-full bg-white/10">
@@ -183,40 +179,29 @@ export default function Dashboard() {
             <div className="text-sm text-zinc-500">Latest activity</div>
           </div>
 
-          <Link
-            className="text-sm font-semibold text-zinc-200 hover:underline"
-            to="/trades"
-          >
+          <Link className="text-sm font-semibold text-zinc-200 hover:underline" to="/trades">
             View all
           </Link>
         </div>
 
         <div className="mt-4">
           {trades.length === 0 ? (
-            <div className="text-sm text-zinc-400">
-              No trades yet. Add your first trade.
-            </div>
+            <div className="text-sm text-zinc-400">No trades yet. Add your first trade.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-xs text-zinc-500">
                   <tr className="border-b border-white/10">
-                    <th className="px-2 py-3 text-left font-semibold">
-                      Symbol
-                    </th>
+                    <th className="px-2 py-3 text-left font-semibold">Symbol</th>
                     <th className="px-2 py-3 text-left font-semibold">Date</th>
                     <th className="px-2 py-3 text-left font-semibold">Side</th>
-                    <th className="px-2 py-3 text-right font-semibold">
-                      P&amp;L
-                    </th>
+                    <th className="px-2 py-3 text-right font-semibold">P&amp;L</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {trades.slice(0, 8).map((t: any) => (
                     <tr key={t.id} className="hover:bg-white/5">
-                      <td className="px-2 py-3 font-semibold text-white">
-                        {t.symbol}
-                      </td>
+                      <td className="px-2 py-3 font-semibold text-white">{t.symbol}</td>
                       <td className="px-2 py-3 text-zinc-500">{t.entryDate}</td>
                       <td className="px-2 py-3">
                         <span
@@ -233,9 +218,7 @@ export default function Dashboard() {
                       <td
                         className={[
                           "px-2 py-3 text-right font-semibold",
-                          Number(t.pnl) >= 0
-                            ? "text-green-500"
-                            : "text-red-500",
+                          Number(t.pnl) >= 0 ? "text-green-500" : "text-red-500",
                         ].join(" ")}
                       >
                         {Number(t.pnl) >= 0 ? "+" : "-"}
@@ -375,9 +358,7 @@ function MetricCard({
           {value}
         </div>
 
-        {sub ? (
-          <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div>
-        ) : null}
+        {sub ? <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div> : null}
       </div>
     </div>
   );
@@ -387,13 +368,7 @@ function MetricCard({
    PERFORMANCE CHART
 ========================= */
 
-function PerformanceChart({
-  trades,
-  totalPL,
-}: {
-  trades: Trade[];
-  totalPL: number;
-}) {
+function PerformanceChart({ trades, totalPL }: { trades: Trade[]; totalPL: number }) {
   const [range, setRange] = useState<"1D" | "1W" | "1M" | "3M" | "ALL">("1W");
 
   const parseYMD = (v?: any) => {
@@ -463,10 +438,7 @@ function PerformanceChart({
         const ts = t.createdAt?.toMillis?.() ?? 0;
         return { ...t, __d: d, __ts: ts };
       })
-      .sort(
-        (a: any, b: any) =>
-          a.__d.getTime() - b.__d.getTime() || a.__ts - b.__ts,
-      )
+      .sort((a: any, b: any) => a.__d.getTime() - b.__d.getTime() || a.__ts - b.__ts)
       .filter((t: any) => t.__d && inRange(t.__d));
 
     let cum = 0;
@@ -536,9 +508,7 @@ function PerformanceChart({
                 onClick={() => setRange(t)}
                 className={[
                   "rounded-xl px-3 py-2 sm:px-4 font-semibold",
-                  range === t
-                    ? "bg-white/10 text-white"
-                    : "text-zinc-400 hover:bg-white/5",
+                  range === t ? "bg-white/10 text-white" : "text-zinc-400 hover:bg-white/5",
                 ].join(" ")}
               >
                 {t}
@@ -597,7 +567,7 @@ function PerformanceChart({
             />
 
             <Area
-              type="linear" // curvy chart - type="monotone"
+              type="linear"
               dataKey="y"
               stroke="rgba(59,130,246,0.95)"
               strokeWidth={2.5}
@@ -624,13 +594,14 @@ function PerformanceChart({
 function MonthlyCalendar({ trades }: { trades: Trade[] }) {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
 
-    const [activeMonth, setActiveMonth] = useState(() => {
+  const [activeMonth, setActiveMonth] = useState(() => {
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), 1);
   });
 
+  const [activeDayKey, setActiveDayKey] = useState<string | null>(null);
 
-   const monthStart = useMemo(() => {
+  const monthStart = useMemo(() => {
     return new Date(activeMonth.getFullYear(), activeMonth.getMonth(), 1);
   }, [activeMonth]);
 
@@ -639,7 +610,7 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
     return new Date(n.getFullYear(), n.getMonth(), 1);
   }, []);
 
-   const nextEnabled = monthStart.getTime() < currentMonthStart.getTime();
+  const nextEnabled = monthStart.getTime() < currentMonthStart.getTime();
 
   const prevMonth = () =>
     setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
@@ -649,11 +620,13 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
     setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   };
 
+  const toggleDay = (k: string) => {
+    setActiveDayKey((p) => (p === k ? null : k));
+  };
 
   // ---- helpers ----
   const pad2 = (n: number) => String(n).padStart(2, "0");
-  const keyOf = (d: Date) =>
-    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const keyOf = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 
   const parseYMD = (s?: string) => {
     if (!s) return null;
@@ -662,28 +635,38 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
     if (!y || !m || !d) return null;
     return new Date(y, m - 1, d);
   };
-  
-
-  // const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
-  // const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
 
   // Monday-start index (Mon=0 ... Sun=6)
   const mondayIndex = (d: Date) => (d.getDay() + 6) % 7;
 
-  // ---- daily pnl map ----
+  // ---- daily pnl map (with symbol breakdown) ----
   const daily = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const t of trades) {
-      const dt = parseYMD((t as any).entryDate);
+    const map = new Map<
+      string,
+      { pnl: number; count: number; bySymbol: Map<string, { pnl: number; count: number }> }
+    >();
+
+    for (const t of trades as any[]) {
+      const dt = parseYMD(t.entryDate);
       if (!dt) continue;
-      if (
-        dt.getMonth() !== monthStart.getMonth() ||
-        dt.getFullYear() !== monthStart.getFullYear()
-      )
+
+      if (dt.getMonth() !== monthStart.getMonth() || dt.getFullYear() !== monthStart.getFullYear())
         continue;
 
       const k = keyOf(dt);
-      map.set(k, (map.get(k) ?? 0) + Number((t as any).pnl ?? 0));
+      const symbol = String(t.symbol ?? "—").toUpperCase();
+      const pnl = Number(t.pnl ?? 0);
+
+      const prev = map.get(k) ?? { pnl: 0, count: 0, bySymbol: new Map() };
+      prev.pnl += pnl;
+      prev.count += 1;
+
+      const sPrev = prev.bySymbol.get(symbol) ?? { pnl: 0, count: 0 };
+      sPrev.pnl += pnl;
+      sPrev.count += 1;
+      prev.bySymbol.set(symbol, sPrev);
+
+      map.set(k, prev);
     }
     return map;
   }, [trades, monthStart.getFullYear(), monthStart.getMonth()]);
@@ -702,10 +685,7 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
         d.setDate(first.getDate() + w * 7 + i);
 
         // keep actual date object, but mark outside month as null
-        if (
-          d.getFullYear() === monthStart.getFullYear() &&
-          d.getMonth() === monthStart.getMonth()
-        ) {
+        if (d.getFullYear() === monthStart.getFullYear() && d.getMonth() === monthStart.getMonth()) {
           row.push(d);
         } else {
           row.push(null);
@@ -717,15 +697,12 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
   }, [monthStart]);
 
   const monthLabel = useMemo(() => {
-    return monthStart.toLocaleDateString(undefined, {
-      month: "long",
-      year: "numeric",
-    });
+    return monthStart.toLocaleDateString(undefined, { month: "long", year: "numeric" });
   }, [monthStart]);
 
   const monthTotal = useMemo(() => {
     let sum = 0;
-    for (const v of daily.values()) sum += v;
+    for (const v of daily.values()) sum += v.pnl;
     return sum;
   }, [daily]);
 
@@ -735,8 +712,7 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
     return `${n > 0 ? "+" : "-"}$${abs}`;
   };
 
-  const pnlColor = (n: number) =>
-    n > 0 ? "text-emerald-500" : n < 0 ? "text-rose-500" : "text-blue-500";
+  const pnlColor = (n: number) => (n > 0 ? "text-emerald-500" : n < 0 ? "text-rose-500" : "text-blue-500");
 
   // ---- styles (exact squares) ----
   const cellBase =
@@ -778,9 +754,7 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
             disabled={!nextEnabled}
             className={[
               "grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200",
-              nextEnabled
-                ? "hover:bg-white/10"
-                : "opacity-40 cursor-not-allowed",
+              nextEnabled ? "hover:bg-white/10" : "opacity-40 cursor-not-allowed",
             ].join(" ")}
             aria-label="Next month"
           >
@@ -807,34 +781,42 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
             let wSum = 0;
             for (const d of week) {
               if (!d) continue;
-              wSum += daily.get(keyOf(d)) ?? 0;
+              const info = daily.get(keyOf(d));
+              if (!info) continue;
+              wSum += info.pnl;
             }
 
             const weeklyRing =
-              wSum > 0
-                ? "ring-1 ring-emerald-500/50"
-                : wSum < 0
-                  ? "ring-1 ring-rose-500/50"
-                  : "";
+              wSum > 0 ? "ring-1 ring-emerald-500/50" : wSum < 0 ? "ring-1 ring-rose-500/50" : "";
 
             return (
               <React.Fragment key={wi}>
                 {week.map((d, di) => {
                   const k = d ? keyOf(d) : "";
-                  const pnl = d ? (daily.get(k) ?? 0) : 0;
-                  const has = d && daily.has(k);
+                  const info = d ? daily.get(k) : undefined;
+                  const pnl = info?.pnl ?? 0;
+                  const has = !!info;
+
+                  const pairs = info
+                    ? Array.from(info.bySymbol.entries())
+                        .map(([symbol, v]) => ({ symbol, pnl: v.pnl, count: v.count }))
+                        .sort((a, b) => Math.abs(b.pnl) - Math.abs(a.pnl))
+                    : [];
 
                   const ring =
                     has && pnl > 0
                       ? "ring-1 ring-emerald-500/50"
                       : has && pnl < 0
-                        ? "ring-1 ring-rose-500/50"
-                        : "";
+                      ? "ring-1 ring-rose-500/50"
+                      : "";
 
                   return (
                     <div
                       key={`${wi}-${di}`}
-                      className={`${cellBase} ${ring} ${!d ? "opacity-40" : ""} min-w-0`}
+                      onClick={() => (d && has ? toggleDay(k) : null)}
+                      className={`${cellBase} ${ring} ${
+                        !d ? "opacity-40" : ""
+                      } min-w-0 group relative ${d && has ? "cursor-pointer" : ""}`}
                     >
                       <div className={cellInner}>
                         <div className="absolute left-0.5 top-0.5 sm:left-0.5 sm:top-0.5 text-[6px] sm:text-[10px] font-semibold tracking-widest text-zinc-500">
@@ -856,15 +838,54 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
                         ) : (
                           <div className="absolute inset-0" />
                         )}
+
+                        {/* hover (desktop) + click (mobile) details */}
+                        {d && has ? (
+                          <div
+                            className={[
+                              "absolute z-50 left-1/2 -translate-x-1/2 top-full mt-2 w-[190px]",
+                              "rounded-2xl border border-white/10 bg-zinc-950/95 p-3 shadow-xl",
+                              "hidden sm:group-hover:block",
+                              activeDayKey === k ? "block sm:block" : "hidden",
+                            ].join(" ")}
+                          >
+                            <div className="text-xs font-semibold text-white">
+                              {d.toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "2-digit",
+                                year: "numeric",
+                              })}
+                            </div>
+
+                            <div className={["mt-1 text-sm font-bold", pnlColor(pnl)].join(" ")}>
+                              {pnl >= 0 ? "+" : "-"}${Math.abs(pnl).toFixed(2)}
+                            </div>
+
+                            <div className="mt-2 space-y-1">
+                              {pairs.slice(0, 6).map((p) => (
+                                <div key={p.symbol} className="flex items-center justify-between text-xs">
+                                  <span className="text-zinc-300 font-semibold">
+                                    {p.symbol}{" "}
+                                    <span className="text-zinc-600 font-normal">({p.count})</span>
+                                  </span>
+                                  <span className={["tabular-nums font-semibold", pnlColor(p.pnl)].join(" ")}>
+                                    {p.pnl >= 0 ? "+" : "-"}${Math.abs(p.pnl).toFixed(2)}
+                                  </span>
+                                </div>
+                              ))}
+                              {pairs.length > 6 ? (
+                                <div className="text-[11px] text-zinc-500">+{pairs.length - 6} more</div>
+                              ) : null}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   );
                 })}
 
                 {/* weekly square (same size as day squares) */}
-                <div
-                  className={`${cellBase} ${wSum !== 0 ? weeklyRing : ""} min-w-0`}
-                >
+                <div className={`${cellBase} ${wSum !== 0 ? weeklyRing : ""} min-w-0`}>
                   <div className="h-full w-full p-1 sm:p-2 flex flex-col justify-between">
                     <div className="text-[6px] sm:text-[9px] font-semibold tracking-widest text-zinc-500">
                       WEEKLY
@@ -879,8 +900,6 @@ function MonthlyCalendar({ trades }: { trades: Trade[] }) {
                     >
                       {money0(wSum)}
                     </div>
-
-                    {/* <div className="text-xs text-zinc-500 truncate">Traded...</div> */}
                   </div>
                 </div>
               </React.Fragment>
