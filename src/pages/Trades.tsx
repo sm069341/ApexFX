@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import { collection, orderBy, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuthState } from "../hooks/useAuthState";
 import type { Trade } from "../types";
@@ -119,37 +119,64 @@ export default function Trades() {
   //   to;
 
   /* ---------- firestore load ---------- */
-  async function load() {
+  // async function load() {
+  //   if (!user) return;
+  //   setLoading(true);
+
+  //   try {
+  //     // keep your index-based query if you already created it
+  //     const q = query(
+  //       collection(db, "trades"),
+  //       where("uid", "==", user.uid),
+  //       orderBy("createdAt", "desc"),
+  //     );
+
+  //     const snap = await getDocs(q);
+
+  //     const rows = snap.docs.map((d) => ({
+  //       id: d.id,
+  //       ...(d.data() as any),
+  //     })) as any[];
+
+  //     setTrades(rows as any);
+  //   } catch (err) {
+  //     console.error("Failed to load trades:", err);
+  //     alert("Failed to load trades. Open console (F12) to see the error.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+  
+  useEffect(() => {
     if (!user) return;
+
     setLoading(true);
 
-    try {
-      // keep your index-based query if you already created it
-      const q = query(
-        collection(db, "trades"),
-        where("uid", "==", user.uid),
-        orderBy("createdAt", "desc"),
-      );
+    const q = query(
+      collection(db, "trades"),
+      where("uid", "==", user.uid),
+      orderBy("createdAt", "desc"),
+    );
 
-      const snap = await getDocs(q);
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const rows = snap.docs.map((d) => ({
+          id: d.id,
+          ...(d.data() as any),
+        })) as any[];
 
-      const rows = snap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as any),
-      })) as any[];
+        setTrades(rows as any);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("Failed to load trades:", err);
+        alert("Failed to load trades. Open console (F12) to see the error.");
+        setLoading(false);
+      },
+    );
 
-      setTrades(rows as any);
-    } catch (err) {
-      console.error("Failed to load trades:", err);
-      alert("Failed to load trades. Open console (F12) to see the error.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => unsub();
   }, [user]);
 
   /* ---------- filtered list ---------- */

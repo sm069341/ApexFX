@@ -62,7 +62,7 @@ export default function TradeForm() {
         entryDate: date,
 
         session,
-        symbol,
+        symbol: symbol.trim().toUpperCase(),
         quantity: Number(quantity),
         entryPrice: Number(entryPrice),
         exitPrice: Number(exitPrice),

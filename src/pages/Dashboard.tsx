@@ -21,6 +21,8 @@ import {
   Target,
   CheckCircle2,
   BarChart3,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 /* ========================
@@ -171,7 +173,7 @@ export default function Dashboard() {
               <Clock
                 size={20}
                 strokeWidth={2.6}
-                className="text-sky-400 shrink-0"
+                className="text-blue-400 shrink-0"
               />
               <span>Recent Trades</span>
             </div>
@@ -325,7 +327,7 @@ function MetricCard({
         currentTone?.surface ?? "bg-zinc-950/40",
         currentTone?.glow ?? "shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
         "hover:-translate-y-1 hover:border-white/15",
-        highlight ? "ring-1 ring-sky-500/15" : "",
+        highlight ? "ring-1 ring-blue-500/15" : "",
       ].join(" ")}
     >
       {/* subtle hover glow */}
@@ -351,7 +353,7 @@ function MetricCard({
           </div>
 
           {badge ? (
-            <span className="rounded-full border border-sky-500/20 bg-sky-500/10 px-3 py-1 text-[11px] font-bold tracking-wide text-sky-200">
+            <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-[11px] font-bold tracking-wide text-blue-200">
               {badge}
             </span>
           ) : null}
@@ -372,7 +374,9 @@ function MetricCard({
           {value}
         </div>
 
-        {sub ? <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div> : null}
+        {sub ? (
+          <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div>
+        ) : null}
       </div>
     </div>
   );
@@ -507,16 +511,16 @@ function PerformanceChart({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <div className="flex items-center gap-2 text-[11px] font-semibold tracking-widest text-zinc-500">
-            <TrendingUp size={20} strokeWidth={2.6} className="text-sky-400" />
+            <TrendingUp size={20} strokeWidth={2.6} className="text-blue-400" />
             <span>PERFORMANCE</span>
           </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <div className="text-3xl font-bold tracking-tight text-sky-400">
+            <div className="text-3xl font-bold tracking-tight text-blue-400">
               {totalPL >= 0 ? "+" : "-"}${Math.abs(totalPL).toFixed(2)}
             </div>
 
-            <div className="rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1 text-sm font-semibold text-sky-300">
+            <div className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-sm font-semibold text-blue-300">
               ↗ {data.length ? "999.9%" : "0.0%"}
             </div>
           </div>
@@ -580,7 +584,7 @@ function PerformanceChart({
                 return (
                   <div className="rounded-2xl border border-white/10 bg-zinc-950/90 px-4 py-3 text-sm text-white shadow-xl">
                     <div className="text-xs text-zinc-400">{label}</div>
-                    <div className="mt-1 text-2xl font-semibold text-sky-300">
+                    <div className="mt-1 text-2xl font-semibold text-blue-300">
                       {val >= 0 ? "+" : "-"}${Math.abs(val).toFixed(2)}
                     </div>
                     <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
@@ -616,14 +620,34 @@ function PerformanceChart({
    Monthly Calendar with Weekly totals
 ========================= */
 
-function MonthlyCalendar({
-  trades,
-  monthDate = new Date(),
-}: {
-  trades: Trade[];
-  monthDate?: Date;
-}) {
+function MonthlyCalendar({ trades }: { trades: Trade[] }) {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
+
+    const [activeMonth, setActiveMonth] = useState(() => {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), 1);
+  });
+
+
+   const monthStart = useMemo(() => {
+    return new Date(activeMonth.getFullYear(), activeMonth.getMonth(), 1);
+  }, [activeMonth]);
+
+  const currentMonthStart = useMemo(() => {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), 1);
+  }, []);
+
+   const nextEnabled = monthStart.getTime() < currentMonthStart.getTime();
+
+  const prevMonth = () =>
+    setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+
+  const nextMonth = () => {
+    if (!nextEnabled) return;
+    setActiveMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  };
+
 
   // ---- helpers ----
   const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -637,8 +661,9 @@ function MonthlyCalendar({
     if (!y || !m || !d) return null;
     return new Date(y, m - 1, d);
   };
+  
 
-  const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
+  // const monthStart = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1);
   // const monthEnd = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0);
 
   // Monday-start index (Mon=0 ... Sun=6)
@@ -704,10 +729,13 @@ function MonthlyCalendar({
   }, [daily]);
 
   const money0 = (n: number) => {
-    const abs = Math.abs(n);
-    const s = abs.toFixed(2);
-    return `${n >= 0 ? "+" : "-"}$${s}`;
+    const abs = Math.abs(n).toFixed(2);
+    if (n === 0) return `$${abs}`;
+    return `${n > 0 ? "+" : "-"}$${abs}`;
   };
+
+  const pnlColor = (n: number) =>
+    n > 0 ? "text-emerald-500" : n < 0 ? "text-rose-500" : "text-blue-500";
 
   // ---- styles (exact squares) ----
   const cellBase =
@@ -719,18 +747,44 @@ function MonthlyCalendar({
       {/* header row */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-sky-500/10">
-            <BarChart3 size={18} strokeWidth={2.6} className="text-sky-400" />
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-blue-500/10">
+            <BarChart3 size={18} strokeWidth={2.6} className="text-blue-400" />
           </div>
 
           <div className="text-lg font-semibold text-white">Monthly P&L</div>
         </div>
-        <div className="text-sm text-zinc-500">
-          Monthly:{" "}
-          <span className="font-semibold text-sky-400">
-            {money0(monthTotal)}
-          </span>
-          <span className="ml-2 font-medium">{monthLabel}</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={prevMonth}
+            className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200 hover:bg-white/10"
+            aria-label="Previous month"
+          >
+            <ChevronLeft size={15} />
+          </button>
+
+          <div className="text-center leading-tight">
+            <div className="text-xs font-semibold text-white">{monthLabel}</div>
+            <div className="text-[10px] text-zinc-600">
+              Monthly:{" "}
+              <span className={["font-bold text-[12px]", pnlColor(monthTotal)].join(" ")}>
+                {money0(monthTotal)}
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={nextMonth}
+            disabled={!nextEnabled}
+            className={[
+              "grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/5 text-zinc-200",
+              nextEnabled
+                ? "hover:bg-white/10"
+                : "opacity-40 cursor-not-allowed",
+            ].join(" ")}
+            aria-label="Next month"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
       </div>
 
@@ -755,6 +809,13 @@ function MonthlyCalendar({
               wSum += daily.get(keyOf(d)) ?? 0;
             }
 
+            const weeklyRing =
+              wSum > 0
+                ? "ring-1 ring-emerald-500/50"
+                : wSum < 0
+                  ? "ring-1 ring-rose-500/50"
+                  : "";
+
             return (
               <React.Fragment key={wi}>
                 {week.map((d, di) => {
@@ -764,9 +825,9 @@ function MonthlyCalendar({
 
                   const ring =
                     has && pnl > 0
-                      ? "ring-1 ring-sky-500/40"
+                      ? "ring-1 ring-emerald-500/50"
                       : has && pnl < 0
-                        ? "ring-1 ring-rose-500/35"
+                        ? "ring-1 ring-rose-500/50"
                         : "";
 
                   return (
@@ -782,10 +843,10 @@ function MonthlyCalendar({
                         {d && has ? (
                           <div
                             className={[
-                              "absolute inset-0 flex items-center justify-center font-semibold tabular-nums",
+                              "absolute inset-0 flex items-center justify-center font-bold tabular-nums",
                               "text-[7.5px] sm:text-xs leading-none",
                               "px-0.5 sm:px-1 whitespace-nowrap",
-                              pnl >= 0 ? "text-green-400" : "text-rose-400",
+                              pnlColor(pnl),
                             ].join(" ")}
                             title={`${pnl >= 0 ? "+" : "-"}$${Math.abs(pnl).toFixed(2)}`}
                           >
@@ -801,7 +862,7 @@ function MonthlyCalendar({
 
                 {/* weekly square (same size as day squares) */}
                 <div
-                  className={`${cellBase} ${wSum !== 0 ? "ring-1 ring-sky-500/30" : ""} min-w-0`}
+                  className={`${cellBase} ${wSum !== 0 ? weeklyRing : ""} min-w-0`}
                 >
                   <div className="h-full w-full p-1 sm:p-2 flex flex-col justify-between">
                     <div className="text-[6px] sm:text-[9px] font-semibold tracking-widest text-zinc-500">
@@ -809,7 +870,10 @@ function MonthlyCalendar({
                     </div>
 
                     <div
-                      className="flex items-center justify-center font-semibold text-sky-400 tabular-nums min-w-0 max-w-full whitespace-nowrap text-[8px] sm:text-xs leading-none"
+                      className={[
+                        "flex items-center justify-center font-bold tabular-nums min-w-0 max-w-full whitespace-nowrap text-[8px] sm:text-xs leading-none",
+                        pnlColor(wSum),
+                      ].join(" ")}
                       title={money0(wSum)}
                     >
                       {money0(wSum)}
@@ -827,7 +891,7 @@ function MonthlyCalendar({
       {/* legend */}
       <div className="mt-4 flex items-center justify-center gap-6 text-sm text-zinc-500">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-sky-500" />
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
           Profit
         </div>
         <div className="flex items-center gap-2">
