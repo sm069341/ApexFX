@@ -39,9 +39,19 @@ function endOfMonth(d: Date) {
 function formatPrice(symbol: string, price: any) {
   const n = Number(price);
   if (!Number.isFinite(n)) return "-";
+
   const s = (symbol || "").toUpperCase();
+
+  // JPY pairs
   if (s.endsWith("JPY")) return n.toFixed(3);
+
+  // Metals
   if (s.includes("XAU") || s.includes("XAG")) return n.toFixed(2);
+
+  // Crypto
+  if (s.includes("BTC") || s.includes("ETH") || s.includes("USDT")) return n.toFixed(2);
+
+  // Default forex
   return n.toFixed(5);
 }
 
