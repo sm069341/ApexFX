@@ -203,7 +203,7 @@ export default function Trades() {
   // const lossCount = useMemo(() => filtered.filter((x: any) => Number(x.pnl) < 0).length, [filtered]);
 
   /* ---------- filters Page (working) ---------- */
-  const PAGE_SIZE = 15;
+  const PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const totalPages = useMemo(() => {
     return Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));

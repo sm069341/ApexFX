@@ -7,12 +7,14 @@ import type { Trade } from "../types";
 import AnalysisSkeleton from "../components/AnalysisSkeleton";
 import {
   ResponsiveContainer,
-  AreaChart,
+  ComposedChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import {
@@ -295,13 +297,39 @@ export default function Analysis() {
       return at - bt;
     });
 
+    const dailyMap = new Map<string, { date: Date; pnl: number }>();
+
+    for (const t of rows) {
+      const d = pickDate(t);
+      if (!d) continue;
+
+      const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const key = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+
+      const prev = dailyMap.get(key) ?? { date: day, pnl: 0 };
+      prev.pnl += safeNum(t.pnl);
+      dailyMap.set(key, prev);
+    }
+
+    const dailyRows = Array.from(dailyMap.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+
     let cum = 0;
-    return rows.map((t) => {
-      const d = pickDate(t) ?? new Date();
-      cum += safeNum(t.pnl);
+
+    return dailyRows.map((row) => {
+      cum += row.pnl;
+      const y = Number(cum.toFixed(2));
+
       return {
-        x: d.toLocaleDateString(undefined, { month: "short", day: "2-digit" }),
-        y: Number(cum.toFixed(2)),
+        x: row.date.toLocaleDateString(undefined, {
+          month: "short",
+          day: "2-digit",
+        }),
+        y,
+        dayPL: Number(row.pnl.toFixed(2)),
+        posY: y >= 0 ? y : 0,
+        negY: y < 0 ? y : 0,
       };
     });
   }, [filteredTrades]);
@@ -417,6 +445,9 @@ export default function Analysis() {
       };
     });
   }, [filteredTrades]);
+
+  const equityLast = equityData[equityData.length - 1]?.y ?? 0;
+  const equityPositive = equityLast >= 0;
 
   if (loading) return <AnalysisSkeleton />;
 
@@ -600,7 +631,9 @@ export default function Analysis() {
                 <TrendingUp
                   size={20}
                   strokeWidth={2.6}
-                  className="text-sky-400"
+                  className={
+                    equityPositive ? "text-emerald-400" : "text-rose-400"
+                  }
                 />
                 <span>Equity Curve</span>
               </div>
@@ -629,17 +662,34 @@ export default function Analysis() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={equityData}>
+                <ComposedChart key={period + resultFilter} data={equityData}>
                   <defs>
-                    <linearGradient id="eqFill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="rgba(59,130,246,0.35)" />
-                      <stop offset="100%" stopColor="rgba(59,130,246,0.00)" />
+                    <linearGradient
+                      id="eqFillGreen"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor="rgba(16,185,129,0.30)" />
+                      <stop offset="100%" stopColor="rgba(16,185,129,0.00)" />
+                    </linearGradient>
+
+                    <linearGradient id="eqFillRed" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="rgba(244,63,94,0.00)" />
+                      <stop offset="100%" stopColor="rgba(244,63,94,0.28)" />
                     </linearGradient>
                   </defs>
 
                   <CartesianGrid
                     stroke="rgba(255,255,255,0.06)"
                     vertical={false}
+                  />
+
+                  <ReferenceLine
+                    y={0}
+                    stroke="rgba(59,130,246,0.25)"
+                    strokeDasharray="3 3"
                   />
 
                   <XAxis
@@ -652,7 +702,7 @@ export default function Analysis() {
 
                   <YAxis
                     orientation="right"
-                    tick={{ fill: "rgba(59,130,246,0.65)", fontSize: 11 }}
+                    tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v: number) => {
@@ -667,15 +717,44 @@ export default function Analysis() {
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null;
-                      const val = payload[0].value as number;
+
+                      const point = payload?.[0]?.payload as {
+                        y: number;
+                        dayPL?: number;
+                      };
+                      if (!point) return null;
+
                       return (
                         <div className="rounded-2xl border border-white/10 bg-zinc-950/90 px-4 py-3 text-sm text-white shadow-xl">
                           <div className="text-xs text-zinc-400">{label}</div>
-                          <div className="mt-1 text-2xl font-semibold text-sky-300">
-                            {val >= 0 ? "+" : "-"}${Math.abs(val).toFixed(2)}
+                          <div
+                            className={[
+                              "mt-1 text-2xl font-semibold",
+                              point.y >= 0
+                                ? "text-emerald-300"
+                                : "text-rose-300",
+                            ].join(" ")}
+                          >
+                            {point.y >= 0 ? "+" : "-"}$
+                            {Math.abs(point.y).toFixed(2)}
                           </div>
                           <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
                             CUMULATIVE P&amp;L
+                          </div>
+                          <div className="mt-2 text-xs text-zinc-400">
+                            Day P&amp;L:{" "}
+                            <span
+                              className={
+                                (point.dayPL ?? 0) > 0
+                                  ? "text-emerald-300"
+                                  : (point.dayPL ?? 0) < 0
+                                    ? "text-rose-300"
+                                    : "text-sky-300"
+                              }
+                            >
+                              {(point.dayPL ?? 0) >= 0 ? "+" : "-"}$
+                              {Math.abs(point.dayPL ?? 0).toFixed(2)}
+                            </span>
                           </div>
                         </div>
                       );
@@ -684,19 +763,64 @@ export default function Analysis() {
 
                   <Area
                     type="linear"
+                    dataKey="posY"
+                    stroke="none"
+                    fill="url(#eqFillGreen)"
+                    isAnimationActive
+                    animationDuration={750}
+                    animationEasing="ease-out"
+                  />
+
+                  <Area
+                    type="linear"
+                    dataKey="negY"
+                    stroke="none"
+                    fill="url(#eqFillRed)"
+                    isAnimationActive
+                    animationDuration={750}
+                    animationEasing="ease-out"
+                  />
+
+                  <Line
+                    type="linear"
                     dataKey="y"
-                    stroke="rgba(59,130,246,0.95)"
-                    strokeWidth={2.5}
-                    fill="url(#eqFill)"
+                    stroke={
+                      equityPositive
+                        ? "rgba(16,185,129,0.9)"
+                        : "rgba(244,63,94,0.9)"
+                    }
+                    strokeWidth={7}
+                    strokeOpacity={0.1}
+                    dot={false}
+                    activeDot={false}
+                    isAnimationActive
+                    animationDuration={750}
+                    animationEasing="ease-out"
+                  />
+
+                  <Line
+                    type="linear"
+                    dataKey="y"
+                    stroke={
+                      equityPositive
+                        ? "rgba(16,185,129,1)"
+                        : "rgba(244,63,94,1)"
+                    }
+                    strokeWidth={2.2}
                     dot={false}
                     activeDot={{
                       r: 5,
                       strokeWidth: 2,
-                      stroke: "rgba(59,130,246,1)",
-                      fill: "rgba(0,0,0,1)",
+                      stroke: equityPositive
+                        ? "rgba(16,185,129,1)"
+                        : "rgba(244,63,94,1)",
+                      fill: "rgba(24,24,27,1)",
                     }}
+                    isAnimationActive
+                    animationDuration={750}
+                    animationEasing="ease-out"
                   />
-                </AreaChart>
+                </ComposedChart>
               </ResponsiveContainer>
             )}
           </div>
@@ -1043,7 +1167,7 @@ function Metric({
   progress?: number;
   tone?: "blue" | "green" | "amber" | "rose";
 }) {
-    const toneStyles = {
+  const toneStyles = {
     blue: {
       glow: "shadow-[0_20px_70px_rgba(59,130,246,0.18)]",
       surface: "bg-gradient-to-b from-blue-800/[0.07] to-zinc-950/40",
@@ -1073,7 +1197,7 @@ function Metric({
         highlight ? "ring-1 ring-sky-500/15" : "",
       ].join(" ")}
     >
-            {/* subtle hover glow */}
+      {/* subtle hover glow */}
       <div
         className={[
           "pointer-events-none absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300",
@@ -1117,7 +1241,9 @@ function Metric({
           {value}
         </div>
 
-        {sub ? <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div> : null}
+        {sub ? (
+          <div className="mt-2 text-[9px] sm:text-xs text-zinc-600">{sub}</div>
+        ) : null}
 
         {typeof progress === "number" ? (
           <div className="mt-4 h-2 w-full rounded-full bg-white/10 overflow-hidden">
@@ -1132,7 +1258,15 @@ function Metric({
   );
 }
 
-function MiniStat({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
+function MiniStat({
+  label,
+  value,
+  danger,
+}: {
+  label: string;
+  value: string;
+  danger?: boolean;
+}) {
   return (
     <div
       className={[
@@ -1141,7 +1275,9 @@ function MiniStat({ label, value, danger }: { label: string; value: string; dang
         "hover:-translate-y-[1px] hover:bg-black/25 hover:border-white/15",
       ].join(" ")}
     >
-      <div className="text-[11px] font-bold tracking-widest text-zinc-500">{label}</div>
+      <div className="text-[11px] font-bold tracking-widest text-zinc-500">
+        {label}
+      </div>
       <div
         className={[
           "mt-2 text-xl font-bold tabular-nums",

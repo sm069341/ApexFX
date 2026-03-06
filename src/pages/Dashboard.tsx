@@ -8,12 +8,14 @@ import { Link } from "react-router-dom";
 import DashboardSkeleton from "../components/DashboardSkeleton";
 import {
   ResponsiveContainer,
-  AreaChart,
+  ComposedChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import {
   TrendingUp,
@@ -570,6 +572,8 @@ function PerformanceChart({
 
     const points = dailyRows.map((row) => {
       cumulative += row.pnl;
+      const y = Number(cumulative.toFixed(2));
+
       return {
         date: row.date,
         x: row.date.toLocaleDateString(undefined, {
@@ -577,7 +581,9 @@ function PerformanceChart({
           day: "2-digit",
         }),
         dayPL: Number(row.pnl.toFixed(2)),
-        y: Number(cumulative.toFixed(2)),
+        y,
+        posY: y >= 0 ? y : 0,
+        negY: y < 0 ? y : 0,
       };
     });
 
@@ -632,19 +638,11 @@ function PerformanceChart({
 
   const chartTone = chartMeta.isPositive
     ? {
-        stroke: "rgba(16,185,129,0.95)",
-        fillTop: "rgba(16,185,129,0.28)",
-        fillBottom: "rgba(16,185,129,0.00)",
-        dotStroke: "rgba(16,185,129,1)",
         badge: "text-emerald-300 border-emerald-500/25 bg-emerald-500/10",
         value: "text-emerald-400",
         icon: "text-emerald-400",
       }
     : {
-        stroke: "rgba(244,63,94,0.95)",
-        fillTop: "rgba(244,63,94,0.24)",
-        fillBottom: "rgba(244,63,94,0.00)",
-        dotStroke: "rgba(244,63,94,1)",
         badge: "text-rose-300 border-rose-500/25 bg-rose-500/10",
         value: "text-rose-400",
         icon: "text-rose-400",
@@ -703,22 +701,33 @@ function PerformanceChart({
         </div>
       </div>
 
-      <div className="mt-4 h-[260px]">
+      <div className="mt-4 h-[260px] sm:h-[360px]">
         {!chartMeta.hasData ? (
           <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-white/10 bg-black/10 text-sm text-zinc-500">
             No trades in this range
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <ComposedChart key={range} data={data}>
               <defs>
-                <linearGradient id="pnlFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={chartTone.fillTop} />
-                  <stop offset="100%" stopColor={chartTone.fillBottom} />
+                <linearGradient id="pnlFillGreen" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(16,185,129,0.30)" />
+                  <stop offset="100%" stopColor="rgba(16,185,129,0.00)" />
+                </linearGradient>
+
+                <linearGradient id="pnlFillRed" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(244,63,94,0.00)" />
+                  <stop offset="100%" stopColor="rgba(244,63,94,0.28)" />
                 </linearGradient>
               </defs>
 
               <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+
+              <ReferenceLine
+                y={0}
+                stroke="rgba(59,130,246,0.25)"
+                strokeDasharray="3 3"
+              />
 
               <XAxis
                 dataKey="x"
@@ -742,10 +751,11 @@ function PerformanceChart({
                 content={({ active, payload, label }) => {
                   if (!active || !payload?.length) return null;
 
-                  const point = payload[0]?.payload as {
+                  const point = payload?.[0]?.payload as {
                     y: number;
                     dayPL: number;
                   };
+                  if (!point) return null;
 
                   return (
                     <div className="rounded-2xl border border-white/10 bg-zinc-950/90 px-4 py-3 text-sm text-white shadow-xl">
@@ -787,21 +797,64 @@ function PerformanceChart({
 
               <Area
                 type="linear"
+                dataKey="posY"
+                stroke="none"
+                fill="url(#pnlFillGreen)"
+                isAnimationActive
+                animationDuration={750}
+                animationEasing="ease-out"
+              />
+
+              <Area
+                type="linear"
+                dataKey="negY"
+                stroke="none"
+                fill="url(#pnlFillRed)"
+                isAnimationActive
+                animationDuration={750}
+                animationEasing="ease-out"
+              />
+
+              <Line
+                type="linear"
                 dataKey="y"
-                stroke={chartTone.stroke}
+                stroke={
+                  chartMeta.isPositive
+                    ? "rgba(16,185,129,0.9)"
+                    : "rgba(244,63,94,0.9)"
+                }
+                strokeWidth={7}
+                strokeOpacity={0.10}
+                dot={false}
+                activeDot={false}
+                isAnimationActive
+                animationDuration={750}
+                animationEasing="ease-out"
+              />
+
+              <Line
+                type="linear"
+                dataKey="y"
+                stroke={
+                  chartMeta.isPositive
+                    ? "rgba(16,185,129,1)"
+                    : "rgba(244,63,94,1)"
+                }
                 strokeWidth={2.2}
-                fill="url(#pnlFill)"
                 dot={false}
                 activeDot={{
                   r: 5,
                   strokeWidth: 2,
-                  stroke: chartTone.dotStroke,
+                  stroke: chartMeta.isPositive
+                    ? "rgba(16,185,129,1)"
+                    : "rgba(244,63,94,1)",
                   fill: "rgba(24,24,27,1)",
                 }}
                 isAnimationActive
-                animationDuration={550}
+                animationDuration={750}
+                animationEasing="ease-out"
               />
-            </AreaChart>
+            </ComposedChart>
           </ResponsiveContainer>
         )}
       </div>
