@@ -399,7 +399,7 @@ function MetricCard({
   return (
     <div
       className={[
-        "rounded-3xl border p-5 border-white/10 transition-all duration-300",
+        "group rounded-3xl border p-5 border-white/10 transition-all duration-300",
         currentTone?.surface ?? "bg-zinc-950/40",
         currentTone?.glow ?? "shadow-[0_20px_60px_rgba(0,0,0,0.4)]",
         "hover:-translate-y-1 hover:border-white/15",
@@ -464,7 +464,7 @@ function MetricCard({
 
 function PerformanceChart({
   trades,
-  totalPL,
+  // totalPL,
 }: {
   trades: Trade[];
   totalPL: number;
@@ -474,17 +474,12 @@ function PerformanceChart({
   const parseYMD = (v?: any) => {
     if (!v) return null;
 
-    // Firestore Timestamp
     if (typeof v?.toDate === "function") return v.toDate();
-
-    // JS Date
     if (v instanceof Date) return v;
 
-    // String parsing
     if (typeof v === "string") {
       const s = v.trim();
 
-      // YYYY-MM-DD or YYYY-M-D
       const dash = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
       if (dash) {
         const y = Number(dash[1]);
@@ -493,7 +488,6 @@ function PerformanceChart({
         return new Date(y, m - 1, d);
       }
 
-      // YYYY/MM/DD or YYYY/M/D
       const slashYMD = s.match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})$/);
       if (slashYMD) {
         const y = Number(slashYMD[1]);
@@ -502,7 +496,6 @@ function PerformanceChart({
         return new Date(y, m - 1, d);
       }
 
-      // MM/DD/YYYY
       const slashMDY = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
       if (slashMDY) {
         const m = Number(slashMDY[1]);
@@ -511,7 +504,6 @@ function PerformanceChart({
         return new Date(y, m - 1, d);
       }
 
-      // last resort (ISO etc.)
       const dt = new Date(s);
       if (!isNaN(dt.getTime())) return dt;
     }
@@ -519,61 +511,117 @@ function PerformanceChart({
     return null;
   };
 
-  const inRange = (d: Date) => {
-    if (range === "ALL") return true;
+  const startOfDay = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+  const rangeStart = useMemo(() => {
     const now = new Date();
     const start = new Date(now);
+
     if (range === "1D") start.setDate(now.getDate() - 1);
     if (range === "1W") start.setDate(now.getDate() - 7);
     if (range === "1M") start.setMonth(now.getMonth() - 1);
     if (range === "3M") start.setMonth(now.getMonth() - 3);
-    start.setHours(0, 0, 0, 0);
-    return d >= start && d <= now;
-  };
+    if (range === "ALL") return null;
 
-  const data = useMemo(() => {
-    const rows = [...trades]
+    start.setHours(0, 0, 0, 0);
+    return start;
+  }, [range]);
+
+  const filteredTrades = useMemo(() => {
+    return [...trades]
       .map((t: any) => {
-        const d = parseYMD(t.entryDate) ?? new Date(0);
-        const ts = t.createdAt?.toMillis?.() ?? 0;
-        return { ...t, __d: d, __ts: ts };
+        const d = parseYMD(t.entryDate);
+        return {
+          ...t,
+          __date: d,
+          __created: t.createdAt?.toMillis?.() ?? 0,
+        };
+      })
+      .filter((t: any) => t.__date instanceof Date)
+      .filter((t: any) => {
+        if (!startOfDay(t.__date)) return false;
+        if (!rangeStart) return true;
+        return startOfDay(t.__date) >= rangeStart;
       })
       .sort(
         (a: any, b: any) =>
-          a.__d.getTime() - b.__d.getTime() || a.__ts - b.__ts,
-      )
-      .filter((t: any) => t.__d && inRange(t.__d));
+          a.__date.getTime() - b.__date.getTime() ||
+          a.__created - b.__created,
+      );
+  }, [trades, rangeStart]);
 
-    let cum = 0;
-    return rows.map((t: any) => {
-      cum += Number(t.pnl ?? 0);
-      const d = t.__d as Date;
-      const label = d.toLocaleDateString(undefined, {
-        month: "short",
-        day: "2-digit",
-      });
-      return { x: label, y: Number(cum.toFixed(2)) };
+  const chartMeta = useMemo(() => {
+    const grouped = new Map<string, { date: Date; pnl: number }>();
+
+    for (const t of filteredTrades as any[]) {
+      const d = startOfDay(t.__date);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const prev = grouped.get(key) ?? { date: d, pnl: 0 };
+      prev.pnl += Number(t.pnl ?? 0);
+      grouped.set(key, prev);
+    }
+
+    const dailyRows = Array.from(grouped.values()).sort(
+      (a, b) => a.date.getTime() - b.date.getTime(),
+    );
+
+    let cumulative = 0;
+
+    const points = dailyRows.map((row) => {
+      cumulative += row.pnl;
+      return {
+        date: row.date,
+        x: row.date.toLocaleDateString(undefined, {
+          month: "short",
+          day: "2-digit",
+        }),
+        dayPL: Number(row.pnl.toFixed(2)),
+        y: Number(cumulative.toFixed(2)),
+      };
     });
-  }, [trades, range]);
 
-  const { domainMin, domainMax, ticks } = useMemo(() => {
-    const ys = data.map((p) => p.y);
+    const first = points[0]?.y ?? 0;
+    const last = points[points.length - 1]?.y ?? 0;
+    const visibleTotal = last;
+
+    let performancePct = 0;
+    if (points.length > 1) {
+      const base = Math.abs(first) < 1 ? 1 : Math.abs(first);
+      performancePct = ((last - first) / base) * 100;
+    } else if (points.length === 1) {
+      performancePct = points[0].y === 0 ? 0 : 100;
+    }
+
+    const ys = points.map((p) => p.y);
     const min = ys.length ? Math.min(...ys) : 0;
     const max = ys.length ? Math.max(...ys) : 0;
 
-    const span = Math.max(1, max - min);
-    const pad = span * 0.12;
+    const span = Math.max(20, max - min);
+    const pad = span * 0.18;
 
-    const dMin = Math.floor((min - pad) / 10) * 10;
-    const dMax = Math.ceil((max + pad) / 10) * 10;
+    const domainMin = Math.floor((min - pad) / 10) * 10;
+    const domainMax = Math.ceil((max + pad) / 10) * 10;
 
     const count = 6;
-    const step = (dMax - dMin) / (count - 1 || 1);
-    const tks = Array.from({ length: count }, (_, i) =>
-      Number((dMin + step * i).toFixed(0)),
+    const step = (domainMax - domainMin) / (count - 1 || 1);
+    const ticks = Array.from({ length: count }, (_, i) =>
+      Number((domainMin + step * i).toFixed(0)),
     );
-    return { domainMin: dMin, domainMax: dMax, ticks: tks };
-  }, [data]);
+
+    return {
+      data: points,
+      domainMin,
+      domainMax,
+      ticks,
+      performancePct,
+      visibleTotal,
+      isPositive: last >= 0,
+      hasData: points.length > 0,
+    };
+  }, [filteredTrades]);
+
+  const data = chartMeta.data;
 
   const formatTick = (v: number) => {
     const abs = Math.abs(v);
@@ -582,27 +630,59 @@ function PerformanceChart({
     return `${sign}$${abs.toFixed(0)}`;
   };
 
+  const chartTone = chartMeta.isPositive
+    ? {
+        stroke: "rgba(16,185,129,0.95)",
+        fillTop: "rgba(16,185,129,0.28)",
+        fillBottom: "rgba(16,185,129,0.00)",
+        dotStroke: "rgba(16,185,129,1)",
+        badge: "text-emerald-300 border-emerald-500/25 bg-emerald-500/10",
+        value: "text-emerald-400",
+        icon: "text-emerald-400",
+      }
+    : {
+        stroke: "rgba(244,63,94,0.95)",
+        fillTop: "rgba(244,63,94,0.24)",
+        fillBottom: "rgba(244,63,94,0.00)",
+        dotStroke: "rgba(244,63,94,1)",
+        badge: "text-rose-300 border-rose-500/25 bg-rose-500/10",
+        value: "text-rose-400",
+        icon: "text-rose-400",
+      };
+
   return (
     <div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div>
           <div className="flex items-center gap-2 text-[11px] font-semibold tracking-widest text-zinc-500">
-            <TrendingUp size={20} strokeWidth={2.6} className="text-blue-400" />
+            <TrendingUp
+              size={20}
+              strokeWidth={2.6}
+              className={chartTone.icon}
+            />
             <span>PERFORMANCE</span>
           </div>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <div className="text-3xl font-bold tracking-tight text-blue-400">
-              {totalPL >= 0 ? "+" : "-"}${Math.abs(totalPL).toFixed(2)}
+            <div
+              className={`text-3xl font-bold tracking-tight ${chartTone.value}`}
+            >
+              {chartMeta.visibleTotal >= 0 ? "+" : "-"}$
+              {Math.abs(chartMeta.visibleTotal).toFixed(2)}
             </div>
 
-            <div className="rounded-full border border-blue-500/25 bg-blue-500/10 px-3 py-1 text-sm font-semibold text-blue-300">
-              ↗ {data.length ? "999.9%" : "0.0%"}
+            <div
+              className={[
+                "rounded-full border px-3 py-1 text-sm font-semibold",
+                chartTone.badge,
+              ].join(" ")}
+            >
+              {chartMeta.performancePct >= 0 ? "↗" : "↘"}{" "}
+              {Math.abs(chartMeta.performancePct).toFixed(1)}%
             </div>
           </div>
         </div>
 
-        {/* ✅ Mobile: buttons go below profit/percentage; Desktop: stays on right */}
         <div className="max-w-full overflow-x-auto sm:overflow-visible">
           <div className="flex w-max items-center gap-1 rounded-2xl border border-white/10 bg-black/20 p-1 text-xs sm:w-auto">
             {(["1D", "1W", "1M", "3M", "ALL"] as const).map((t) => (
@@ -624,69 +704,106 @@ function PerformanceChart({
       </div>
 
       <div className="mt-4 h-[260px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="pnlFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="rgba(59,130,246,0.35)" />
-                <stop offset="100%" stopColor="rgba(59,130,246,0.00)" />
-              </linearGradient>
-            </defs>
+        {!chartMeta.hasData ? (
+          <div className="flex h-full items-center justify-center rounded-3xl border border-dashed border-white/10 bg-black/10 text-sm text-zinc-500">
+            No trades in this range
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="pnlFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={chartTone.fillTop} />
+                  <stop offset="100%" stopColor={chartTone.fillBottom} />
+                </linearGradient>
+              </defs>
 
-            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
 
-            <XAxis
-              dataKey="x"
-              tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              minTickGap={18}
-            />
+              <XAxis
+                dataKey="x"
+                tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                minTickGap={18}
+              />
 
-            <YAxis
-              ticks={ticks}
-              domain={[domainMin, domainMax]}
-              tickFormatter={formatTick}
-              tick={{ fill: "rgba(59,130,246,0.65)", fontSize: 11 }}
-              axisLine={false}
-              tickLine={false}
-              orientation="right"
-            />
+              <YAxis
+                ticks={chartMeta.ticks}
+                domain={[chartMeta.domainMin, chartMeta.domainMax]}
+                tickFormatter={formatTick}
+                tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                orientation="right"
+              />
 
-            <Tooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                const val = payload[0].value as number;
-                return (
-                  <div className="rounded-2xl border border-white/10 bg-zinc-950/90 px-4 py-3 text-sm text-white shadow-xl">
-                    <div className="text-xs text-zinc-400">{label}</div>
-                    <div className="mt-1 text-2xl font-semibold text-blue-300">
-                      {val >= 0 ? "+" : "-"}${Math.abs(val).toFixed(2)}
+              <Tooltip
+                content={({ active, payload, label }) => {
+                  if (!active || !payload?.length) return null;
+
+                  const point = payload[0]?.payload as {
+                    y: number;
+                    dayPL: number;
+                  };
+
+                  return (
+                    <div className="rounded-2xl border border-white/10 bg-zinc-950/90 px-4 py-3 text-sm text-white shadow-xl">
+                      <div className="text-xs text-zinc-400">{label}</div>
+
+                      <div
+                        className={[
+                          "mt-1 text-2xl font-semibold",
+                          point.y >= 0 ? "text-emerald-300" : "text-rose-300",
+                        ].join(" ")}
+                      >
+                        {point.y >= 0 ? "+" : "-"}$
+                        {Math.abs(point.y).toFixed(2)}
+                      </div>
+
+                      <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
+                        CUMULATIVE P&amp;L
+                      </div>
+
+                      <div className="mt-2 text-xs text-zinc-400">
+                        Day P&amp;L:{" "}
+                        <span
+                          className={
+                            point.dayPL > 0
+                              ? "text-emerald-300"
+                              : point.dayPL < 0
+                                ? "text-rose-300"
+                                : "text-blue-300"
+                          }
+                        >
+                          {point.dayPL >= 0 ? "+" : "-"}$
+                          {Math.abs(point.dayPL).toFixed(2)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
-                      CUMULATIVE P&amp;L
-                    </div>
-                  </div>
-                );
-              }}
-            />
+                  );
+                }}
+              />
 
-            <Area
-              type="linear"
-              dataKey="y"
-              stroke="rgba(59,130,246,0.95)"
-              strokeWidth={2.5}
-              fill="url(#pnlFill)"
-              dot={false}
-              activeDot={{
-                r: 5,
-                strokeWidth: 2,
-                stroke: "rgba(59,130,246,1)",
-                fill: "rgba(0,0,0,1)",
-              }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+              <Area
+                type="linear"
+                dataKey="y"
+                stroke={chartTone.stroke}
+                strokeWidth={2.2}
+                fill="url(#pnlFill)"
+                dot={false}
+                activeDot={{
+                  r: 5,
+                  strokeWidth: 2,
+                  stroke: chartTone.dotStroke,
+                  fill: "rgba(24,24,27,1)",
+                }}
+                isAnimationActive
+                animationDuration={550}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );
