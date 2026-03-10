@@ -13,6 +13,7 @@ import Trades from "./pages/Trades";
 import TradeForm from "./pages/TradeForm";
 import AppSidebar from "./components/AppSidebar";
 import Analysis from "./pages/Analysis";
+import Insights from "./pages/Insights";
 import { useAuthState } from "./hooks/useAuthState";
 import type { JSX } from "react";
 import { signOut } from "firebase/auth";
@@ -30,6 +31,7 @@ function usePageTitle(pathname: string) {
     const p = pathname.replace("/", "");
     if (p.startsWith("trades")) return "Trades";
     if (p.startsWith("analysis")) return "Analysis";
+    if (p.startsWith("insights")) return "Insights";
     if (p.startsWith("dashboard")) return "Dashboard";
     return p.charAt(0).toUpperCase() + p.slice(1);
   }, [pathname]);
@@ -255,6 +257,7 @@ function AppRoutes() {
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="trades" element={<Trades />} />
                   <Route path="analysis" element={<Analysis />} />
+                  <Route path="insights" element={<Insights />} />
                   <Route index element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Shell>

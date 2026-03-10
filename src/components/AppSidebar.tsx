@@ -1,7 +1,12 @@
 import { NavLink } from "react-router-dom";
 import React from "react";
 import { useAuthState } from "../hooks/useAuthState";
-import { LayoutDashboard, CandlestickChart, BarChart3 } from "lucide-react";
+import {
+  LayoutDashboard,
+  CandlestickChart,
+  BarChart3,
+  Sparkles,
+} from "lucide-react";
 
 type NavItem = {
   to: string;
@@ -13,6 +18,7 @@ const navItems: NavItem[] = [
   { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
   { to: "/trades", label: "Trades", icon: <CandlestickChart size={18} /> },
   { to: "/analysis", label: "Analysis", icon: <BarChart3 size={18} /> },
+  { to: "/insights", label: "Insights", icon: <Sparkles size={18} /> },
 ];
 
 function NavRow({ to, label, icon }: NavItem) {
