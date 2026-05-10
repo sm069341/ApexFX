@@ -55,9 +55,9 @@ function formatK(n: number) {
   return `${sign}$${abs.toFixed(2)}`;
 }
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
+// function clamp(n: number, a: number, b: number) {
+//   return Math.max(a, Math.min(b, n));
+// }
 
 function periodStart(period: PeriodKey) {
   const now = new Date();
@@ -619,14 +619,14 @@ export default function Insights() {
   ]);
 
   const bestStrategyCard = strategyPerf.filter((s) => s.count >= 3)[0];
-  const worstStrategyCard = [...strategyPerf]
-    .filter((s) => s.count >= 3 && s.tag !== bestStrategyCard?.tag)
-    .sort((a, b) => a.winRate - b.winRate || a.pnl - b.pnl)[0];
+  // const worstStrategyCard = [...strategyPerf]
+  //   .filter((s) => s.count >= 3 && s.tag !== bestStrategyCard?.tag)
+  //   .sort((a, b) => a.winRate - b.winRate || a.pnl - b.pnl)[0];
 
-  const topThreeStrategies = strategyPerf.slice(0, 6);
-  const topThreeSymbols = [...symbolPerf]
-    .sort((a, b) => b.pnl - a.pnl)
-    .slice(0, 6);
+  // const topThreeStrategies = strategyPerf.slice(0, 6);
+  // const topThreeSymbols = [...symbolPerf]
+  //   .sort((a, b) => b.pnl - a.pnl)
+  //   .slice(0, 6);
 
   if (loading) return <AnalysisSkeleton />;
 
@@ -1160,77 +1160,77 @@ function InsightCard({
   );
 }
 
-function MiniInsight({
-  label,
-  value,
-  sub,
-  tone,
-}: {
-  label: string;
-  value: string;
-  sub: string;
-  tone: "green" | "rose";
-}) {
-  return (
-    <div
-      className={[
-        "group relative overflow-hidden rounded-3xl border p-4",
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-[2px] hover:border-white/15",
-        tone === "green"
-          ? "border-emerald-500/15 bg-gradient-to-b from-emerald-500/[0.08] to-black/20"
-          : "border-rose-500/15 bg-gradient-to-b from-rose-500/[0.08] to-black/20",
-      ].join(" ")}
-    >
-      <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
-        {label}
-      </div>
+// function MiniInsight({
+//   label,
+//   value,
+//   sub,
+//   tone,
+// }: {
+//   label: string;
+//   value: string;
+//   sub: string;
+//   tone: "green" | "rose";
+// }) {
+//   return (
+//     <div
+//       className={[
+//         "group relative overflow-hidden rounded-3xl border p-4",
+//         "transition-all duration-300 ease-out",
+//         "hover:-translate-y-[2px] hover:border-white/15",
+//         tone === "green"
+//           ? "border-emerald-500/15 bg-gradient-to-b from-emerald-500/[0.08] to-black/20"
+//           : "border-rose-500/15 bg-gradient-to-b from-rose-500/[0.08] to-black/20",
+//       ].join(" ")}
+//     >
+//       <div className="text-[11px] font-semibold tracking-widest text-zinc-500">
+//         {label}
+//       </div>
 
-      <div
-        className={[
-          "mt-2 text-lg font-bold",
-          tone === "green" ? "text-emerald-300" : "text-rose-300",
-        ].join(" ")}
-      >
-        {value}
-      </div>
+//       <div
+//         className={[
+//           "mt-2 text-lg font-bold",
+//           tone === "green" ? "text-emerald-300" : "text-rose-300",
+//         ].join(" ")}
+//       >
+//         {value}
+//       </div>
 
-      <div className="mt-1 text-xs text-zinc-400">{sub}</div>
-    </div>
-  );
-}
+//       <div className="mt-1 text-xs text-zinc-400">{sub}</div>
+//     </div>
+//   );
+// }
 
-function BarRow({
-  label,
-  value,
-  valueText,
-  sub,
-}: {
-  label: string;
-  value: number;
-  valueText: string;
-  sub: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:bg-black/25 hover:border-white/15">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="font-semibold text-white truncate">{label}</div>
-          <div className="text-xs text-zinc-500">{sub}</div>
-        </div>
+// function BarRow({
+//   label,
+//   value,
+//   valueText,
+//   sub,
+// }: {
+//   label: string;
+//   value: number;
+//   valueText: string;
+//   sub: string;
+// }) {
+//   return (
+//     <div className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:bg-black/25 hover:border-white/15">
+//       <div className="flex items-center justify-between gap-3">
+//         <div className="min-w-0">
+//           <div className="font-semibold text-white truncate">{label}</div>
+//           <div className="text-xs text-zinc-500">{sub}</div>
+//         </div>
 
-        <div className="text-sm font-bold text-zinc-300 whitespace-nowrap">
-          {valueText}
-        </div>
-      </div>
+//         <div className="text-sm font-bold text-zinc-300 whitespace-nowrap">
+//           {valueText}
+//         </div>
+//       </div>
 
-      {/* subtle neutral progress (no red/green) */}
-      <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
-        <div
-          className="h-1.5 rounded-full bg-white/10"
-          style={{ width: `${clamp(value, 6, 100)}%` }}
-        />
-      </div>
-    </div>
-  );
-}
+//       {/* subtle neutral progress (no red/green) */}
+//       <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
+//         <div
+//           className="h-1.5 rounded-full bg-white/10"
+//           style={{ width: `${clamp(value, 6, 100)}%` }}
+//         />
+//       </div>
+//     </div>
+//   );
+// }
