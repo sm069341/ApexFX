@@ -104,16 +104,26 @@ export default function AppSidebar() {
         <div className="flex h-full flex-col px-4 py-4 overflow-hidden">
           {/* Brand */}
           <div className="flex items-center gap-3 px-2 py-2">
-            <div className="grid h-10 w-10 place-items-center rounded-xl  bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+            <div className="grid h-16 w-16 place-items-center rounded-xl  bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
               <img
                 src={`${import.meta.env.BASE_URL}logo.png`}
                 alt="TradeXVault"
-                className="h-10 w-auto drop-shadow-md"
+                className="h-16 w-16 drop-shadow-md"
               />
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-lg font-semibold text-slate-900 dark:text-white">
-                TradeXVault
+              <div className="flex flex-col leading-none">
+                <h1 className="text-2xl font-black tracking-tight -skew-x-6">
+                  <span className="text-slate-900 dark:text-white">Apex</span>
+
+                  <span className="bg-gradient-to-b from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent drop-shadow-[0_2px_6px_rgba(20,60,160,0.35)]">
+                    FX
+                  </span>
+                </h1>
+
+                <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-zinc-500">
+                  Trading Journal
+                </span>
               </div>
             </div>
           </div>

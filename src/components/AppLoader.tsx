@@ -4,8 +4,8 @@ export default function AppLoader({ label = "Loading…" }: { label?: string }) 
       <div className="flex flex-col items-center gap-4">
         <img
           src={`${import.meta.env.BASE_URL}logo.png`}
-          alt="TradeXVault"
-          className="h-14 w-auto drop-shadow-md animate-[softPop_.35s_ease-out]"
+          alt="ApexFX"
+          className="h-20 w-auto drop-shadow-md animate-[softPop_.35s_ease-out]"
         />
 
         <div className="h-10 w-10 rounded-full border-2 border-white/30 border-t-white animate-spin" />

@@ -95,19 +95,34 @@ export default function Login() {
           </div>
         )}
 
-        <div className="flex items-center gap-3">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="TradeXVault"
-            className="h-12 w-auto drop-shadow-md transition-transform duration-300 hover:scale-[1.03]"
-          />
-          <div>
-            <div className="text-xl font-semibold">TradeXVault</div>
-            <div className="text-sm text-zinc-400">
-              Sign in to your dashboard
-            </div>
-          </div>
-        </div>
+        {/* Brand */}
+<div className="flex items-center gap-3 px-2 py-2">
+  {/* Bigger Logo */}
+  <div className="grid h-16 w-16 place-items-center rounded-xl bg-white shadow-sm dark:bg-zinc-950">
+    <img
+      src={`${import.meta.env.BASE_URL}logo.png`}
+      alt="ApexFX"
+      className="h-16 w-16 object-contain drop-shadow-md"
+    />
+  </div>
+
+  {/* ApexFX Branding */}
+  <div className="flex flex-col justify-center">
+  <h1 className="h-10 pt-1 text-[30px] font-black italic -skew-x-6 tracking-tight leading-none overflow-visible">
+    <span className="text-slate-900 dark:text-white">
+      Apex
+    </span>
+
+    <span className="bg-gradient-to-b from-blue-300 via-blue-500 to-blue-900 bg-clip-text text-transparent drop-shadow-[0_2px_5px_rgba(20,60,160,0.28)]">
+      FX
+    </span>
+  </h1>
+
+  <span className="-mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-400 dark:text-zinc-500">
+    Trading Journal
+  </span>
+</div>
+</div>
 
         <div className="mt-6">
           <form onSubmit={handleLogin} className="mt-6 space-y-4">
@@ -168,7 +183,7 @@ export default function Login() {
             </button>
 
             <div className="pt-2 text-center text-xs text-zinc-500">
-              Secure login • TradeXVault
+              Secure login • ApexFX
             </div>
           </form>
         </div>

@@ -174,8 +174,8 @@ function Shell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3">
                 <img
                   src={`${import.meta.env.BASE_URL}logo.png`}
-                  alt="TradeXVault"
-                  className="h-9 w-auto drop-shadow-md"
+                  alt="ApexFX"
+                  className="h-10 w-auto drop-shadow-md"
                 />
                 <div className="text-lg font-semibold text-white">{title}</div>
               </div>
