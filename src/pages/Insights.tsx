@@ -809,187 +809,151 @@ export default function Insights() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Panel>
           <div className="flex items-center gap-3 text-lg font-semibold text-white">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/15 text-emerald-300 shadow-[0_0_22px_rgba(16,185,129,0.16)]">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
               <BadgeCheck size={20} strokeWidth={2.6} />
             </div>
+
             <div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-lg font-bold bg-gradient-to-r from-emerald-200 to-emerald-400 bg-clip-text text-transparent">
                 Strategy Breakdown
               </div>
-              <div className="text-sm text-zinc-500">Best and worst setups</div>
+              <div className="text-sm text-zinc-400">
+                Best and worst setups analyzed
+              </div>
             </div>
           </div>
 
-          <div className="mt-4 space-y-3">
-            <MiniInsight
-              label="Best Strategy"
-              value={bestStrategyCard?.tag || "—"}
-              sub={
-                bestStrategyCard
-                  ? `${bestStrategyCard.winRate.toFixed(0)}% win • ${formatK(
-                      bestStrategyCard.pnl,
-                    )}`
-                  : "Not enough data"
-              }
-              tone="green"
-            />
+          <div className="mt-4 space-y-2">
+            <div className="grid grid-cols-12 text-xs text-zinc-500 border-b border-white/5 pb-2">
+              <div className="col-span-6">Strategy</div>
+              <div className="col-span-2 text-right">Trades</div>
+              <div className="col-span-2 text-right">Win%</div>
+              <div className="col-span-2 text-right">P&L</div>
+            </div>
 
-            <MiniInsight
-              label="Weakest Strategy"
-              value={worstStrategyCard?.tag || "—"}
-              sub={
-                worstStrategyCard
-                  ? `${worstStrategyCard.winRate.toFixed(0)}% win • ${formatK(
-                      worstStrategyCard.pnl,
-                    )}`
-                  : "Not enough data"
-              }
-              tone="rose"
-            />
-          </div>
+            {strategyPerf.slice(0, 8).map((s) => (
+              <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
+  <div className="col-span-6 text-zinc-200 truncate">
+    {s.tag}
+  </div>
 
-          <div className="mt-4 space-y-3">
-            {topThreeStrategies.length === 0 ? (
-              <div className="text-sm text-zinc-500">No strategy data</div>
-            ) : (
-              topThreeStrategies.map((item) => (
-                <BarRow
-                  key={item.tag}
-                  label={item.tag}
-                  value={item.winRate}
-                  valueText={`${item.winRate.toFixed(0)}%`}
-                  sub={`${item.count} trades • ${formatK(item.pnl)}`}
-                  tone={item.pnl >= 0 ? "green" : "rose"}
-                />
-              ))
-            )}
+  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+    {s.count}
+  </div>
+
+  <div className="col-span-2 text-right text-zinc-400 px-2">
+    {s.winRate.toFixed(0)}%
+  </div>
+
+  <div
+    className={`col-span-2 text-right font-semibold pl-2 ${
+      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+    }`}
+  >
+    {formatK(s.pnl)}
+  </div>
+</div>
+            ))}
           </div>
         </Panel>
+
         <Panel>
           <div className="flex items-center gap-3 text-lg font-semibold text-white">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-500/15 text-amber-300 shadow-[0_0_22px_rgba(245,158,11,0.16)]">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-500/20 text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.25)]">
               <Coins size={20} strokeWidth={2.6} />
             </div>
+
             <div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-lg font-bold bg-gradient-to-r from-amber-200 to-yellow-400 bg-clip-text text-transparent">
                 Symbol Breakdown
               </div>
-              <div className="text-sm text-zinc-500">
-                Pairs and assets performance
+              <div className="text-sm text-zinc-400">
+                Performance across traded assets
               </div>
             </div>
           </div>
 
-          <div className="mt-4 space-y-3">
-            {topThreeSymbols.length === 0 ? (
-              <div className="text-sm text-zinc-500">No symbol data</div>
-            ) : (
-              topThreeSymbols.map((item) => {
-                const width = clamp(
-                  (Math.abs(item.pnl) /
-                    Math.max(1, Math.abs(topThreeSymbols[0]?.pnl || 1))) *
-                    100,
-                  6,
-                  100,
-                );
+          <div className="mt-4 space-y-2">
+            <div className="grid grid-cols-12 text-xs text-zinc-500 border-b border-white/5 pb-2">
+              <div className="col-span-6">Symbol</div>
+              <div className="col-span-2 text-right">Trades</div>
+              <div className="col-span-2 text-right">Win%</div>
+              <div className="col-span-2 text-right">P&L</div>
+            </div>
 
-                return (
-                  <div
-                    key={item.symbol}
-                    className="rounded-2xl border border-white/10 bg-black/20 p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-white">
-                          {item.symbol}
-                        </div>
-                        <div className="text-xs text-zinc-500">
-                          {item.count} trades • {item.winRate.toFixed(0)}% win
-                        </div>
-                      </div>
+            {symbolPerf.slice(0, 8).map((s) => (
+              <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
+  <div className="col-span-6 text-white font-medium">
+    {s.symbol}
+  </div>
 
-                      <div
-                        className={`text-sm font-bold ${
-                          item.pnl >= 0 ? "text-emerald-400" : "text-rose-400"
-                        }`}
-                      >
-                        {formatK(item.pnl)}
-                      </div>
-                    </div>
+  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+    {s.count}
+  </div>
 
-                    <div className="mt-3 h-2 rounded-full bg-white/10">
-                      <div
-                        className={`h-2 rounded-full ${
-                          item.pnl >= 0 ? "bg-emerald-500" : "bg-rose-500"
-                        }`}
-                        style={{ width: `${width}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            )}
+  <div className="col-span-2 text-right text-zinc-400 px-2">
+    {s.winRate.toFixed(0)}%
+  </div>
+
+  <div
+    className={`col-span-2 text-right font-semibold pl-2 ${
+      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+    }`}
+  >
+    {formatK(s.pnl)}
+  </div>
+</div>
+            ))}
           </div>
         </Panel>
 
         <Panel>
           <div className="flex items-center gap-3 text-lg font-semibold text-white">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/15 text-sky-300 shadow-[0_0_22px_rgba(59,130,246,0.16)]">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/20 text-sky-300 shadow-[0_0_30px_rgba(59,130,246,0.25)]">
               <Globe size={20} strokeWidth={2.6} />
             </div>
+
             <div>
-              <div className="text-lg font-semibold text-white">
+              <div className="text-lg font-bold bg-gradient-to-r from-sky-200 to-blue-400 bg-clip-text text-transparent">
                 Session Breakdown
               </div>
-              <div className="text-sm text-zinc-500">
-                Asia, London and New York
+              <div className="text-sm text-zinc-400">
+                Trading performance by global session
               </div>
             </div>
           </div>
 
-          <div className="mt-4 space-y-3">
-            {sessionPerf.map((item) => {
-              const maxAbs = Math.max(
-                1,
-                ...sessionPerf.map((s) => Math.abs(s.pnl)),
-              );
-              const width = (Math.abs(item.pnl) / maxAbs) * 100;
+          <div className="mt-4 space-y-2">
+            <div className="grid grid-cols-12 text-xs text-zinc-500 border-b border-white/5 pb-2">
+              <div className="col-span-6">Session</div>
+              <div className="col-span-2 text-right">Trades</div>
+              <div className="col-span-2 text-right">Win%</div>
+              <div className="col-span-2 text-right">P&L</div>
+            </div>
 
-              return (
-                <div
-                  key={item.name}
-                  className="rounded-2xl border border-white/10 bg-black/20 p-4"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-semibold text-white">
-                        {item.name}
-                      </div>
-                      <div className="text-xs text-zinc-500">
-                        {item.count} trades • {item.winRate.toFixed(0)}% win
-                      </div>
-                    </div>
+            {sessionPerf.map((s) => (
+              <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
+  <div className="col-span-6 text-white font-medium">
+    {s.name}
+  </div>
 
-                    <div
-                      className={`text-sm font-bold ${
-                        item.pnl >= 0 ? "text-emerald-400" : "text-rose-400"
-                      }`}
-                    >
-                      {formatK(item.pnl)}
-                    </div>
-                  </div>
+  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+    {s.count}
+  </div>
 
-                  <div className="mt-3 h-2 rounded-full bg-white/10">
-                    <div
-                      className={`h-2 rounded-full ${
-                        item.pnl >= 0 ? "bg-sky-500" : "bg-rose-500"
-                      }`}
-                      style={{ width: `${clamp(width, 6, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+  <div className="col-span-2 text-right text-zinc-400 px-2">
+    {s.winRate.toFixed(0)}%
+  </div>
+
+  <div
+    className={`col-span-2 text-right font-semibold pl-2 ${
+      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+    }`}
+  >
+    {formatK(s.pnl)}
+  </div>
+</div>
+            ))}
           </div>
         </Panel>
       </div>
@@ -1241,40 +1205,29 @@ function BarRow({
   value,
   valueText,
   sub,
-  tone,
 }: {
   label: string;
   value: number;
   valueText: string;
   sub: string;
-  tone: "green" | "rose";
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:bg-black/25 hover:border-white/15">
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="font-semibold text-white">{label}</div>
+        <div className="min-w-0">
+          <div className="font-semibold text-white truncate">{label}</div>
           <div className="text-xs text-zinc-500">{sub}</div>
         </div>
 
-        <div
-          className={[
-            "rounded-xl px-2.5 py-1 text-xs font-bold",
-            tone === "green"
-              ? "bg-emerald-500/10 text-emerald-300"
-              : "bg-rose-500/10 text-rose-300",
-          ].join(" ")}
-        >
+        <div className="text-sm font-bold text-zinc-300 whitespace-nowrap">
           {valueText}
         </div>
       </div>
 
-      <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+      {/* subtle neutral progress (no red/green) */}
+      <div className="mt-3 h-1.5 rounded-full bg-white/5 overflow-hidden">
         <div
-          className={[
-            "h-2 rounded-full transition-all duration-500",
-            tone === "green" ? "bg-emerald-500" : "bg-rose-500",
-          ].join(" ")}
+          className="h-1.5 rounded-full bg-white/10"
           style={{ width: `${clamp(value, 6, 100)}%` }}
         />
       </div>
