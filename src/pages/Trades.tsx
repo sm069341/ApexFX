@@ -11,7 +11,7 @@ import { useAuthState } from "../hooks/useAuthState";
 import type { Trade } from "../types";
 import { money } from "../lib/format";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowUpRight, ArrowDownRight, History } from "lucide-react";
+import { History } from "lucide-react";
 import TradesSkeleton from "../components/TradesSkeleton";
 
 /* ---------- helpers ---------- */

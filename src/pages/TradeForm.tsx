@@ -26,7 +26,7 @@ export default function TradeForm() {
   const [date, setDate] = useState("");
   // const sessions = ["Asia", "London", "New York"];
   const [session, setSession] = useState("");
-  const [setSessionOpen] = useState(false);
+  // const [setSessionOpen] = useState(false);
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
   const [entryPrice, setEntryPrice] = useState("");
