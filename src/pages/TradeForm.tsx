@@ -1,9 +1,22 @@
 import { collection, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "../firebase";
+import { motion } from "framer-motion";
 import { useAuthState } from "../hooks/useAuthState";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Sparkles, Calendar, TrendingUp, TrendingDown, DollarSign, CheckCircle, X, CircleDot, XCircle, ChevronDown, Check } from "lucide-react";
+import {
+  Sparkles,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  CheckCircle,
+  X,
+  CircleDot,
+  XCircle,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 
 export default function TradeForm() {
   const { user } = useAuthState();
@@ -11,17 +24,26 @@ export default function TradeForm() {
 
   const [side, setSide] = useState<"LONG" | "SHORT">("LONG");
   const [date, setDate] = useState("");
-  const sessions = ["Asia", "London", "New York"];
+  // const sessions = ["Asia", "London", "New York"];
   const [session, setSession] = useState("");
-  const [sessionOpen, setSessionOpen] = useState(false);
+  const [setSessionOpen] = useState(false);
   const [symbol, setSymbol] = useState("");
   const [quantity, setQuantity] = useState("");
   const [entryPrice, setEntryPrice] = useState("");
   const [exitPrice, setExitPrice] = useState("");
   const [result, setResult] = useState<"WIN" | "LOSS" | "BE">("WIN");
   const [pnl, setPnl] = useState("");
-  const [equityAfter, setEquityAfter] = useState("");
-  const strategies = ["A+", "TJL-1", "TJL-2", "SBR", "RBS", "5Wave Choch", "Dual Choch"];
+  const [pips, setPips] = useState("");
+  const [equityAfter] = useState("");
+  const strategies = [
+    "A+",
+    "TJL-1",
+    "TJL-2",
+    "SBR",
+    "RBS",
+    "5Wave Choch",
+    "Dual Choch",
+  ];
   const timeframes = ["1m", "5m", "15m", "1h", "4h", "1D"];
 
   const [strategy, setStrategy] = useState("");
@@ -31,6 +53,9 @@ export default function TradeForm() {
   const [timeframeOpen, setTimeframeOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [pnlPulseKey, setPnlPulseKey] = useState(0);
+
+  const [missing, setMissing] = useState<string[]>([]);
+  const [shake, setShake] = useState(false);
 
   useEffect(() => {
     // pulse only for WIN/LOSS (not BE)
@@ -55,20 +80,54 @@ export default function TradeForm() {
       return;
     }
 
-    setSaving(true);
+    const errors: string[] = [];
 
-    const rawPnl = Number(pnl || 0);
-    const normalizedPnl =
-      result === "WIN"
-        ? Math.abs(rawPnl)
-        : result === "LOSS"
-          ? -Math.abs(rawPnl)
-          : 0;
+    if (!date) errors.push("date");
+    if (!session) errors.push("session");
+    if (!symbol) errors.push("symbol");
+    if (!quantity) errors.push("quantity");
+    if (!entryPrice) errors.push("entryPrice");
+    if (!exitPrice) errors.push("exitPrice");
+    if (!result) errors.push("result");
+    if (!pnl) errors.push("pnl");
+    if (!pips) errors.push("pips");
+    if (!strategy) errors.push("strategy");
+    if (!timeframe) errors.push("timeframe");
+
+    setMissing(errors);
+
+    if (errors.length > 0) {
+      setMissing(errors);
+
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+
+      return;
+    }
+    setSaving(true);
 
     // normalize symbol for message (keep stored symbol as typed)
     const symForMsg = (symbol || "Trade").toUpperCase().trim() || "Trade";
 
     try {
+      const pnlValue = Number(pnl || 0);
+
+      const normalizedPnl =
+        result === "WIN"
+          ? Math.abs(pnlValue)
+          : result === "LOSS"
+            ? -Math.abs(pnlValue)
+            : 0;
+
+      const pipValue = Number(pips || 0);
+
+      const normalizedPips =
+        result === "WIN"
+          ? Math.abs(pipValue)
+          : result === "LOSS"
+            ? -Math.abs(pipValue)
+            : 0;
+
       await addDoc(collection(db, "trades"), {
         uid: user.uid,
 
@@ -84,6 +143,9 @@ export default function TradeForm() {
         result,
         pnl: normalizedPnl,
         equityAfter: Number(equityAfter),
+
+        // ✅ ONLY THIS
+        pips: normalizedPips,
 
         tags: strategy && timeframe ? [`${strategy} ${timeframe}`] : [],
         notes,
@@ -106,6 +168,8 @@ export default function TradeForm() {
       setSuccess(false);
     }
   }
+
+  const isError = (field: string) => missing.includes(field);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm px-4 py-8">
@@ -175,9 +239,14 @@ export default function TradeForm() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className={shake ? "shake" : ""}>
               {/* Long / Short segmented control */}
-              <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-1">
+              <div className="mb-6 relative rounded-2xl border border-white/10 bg-white/5 p-1">
+                <div
+                  className={`absolute top-1 bottom-1 w-1/2 rounded-2xl transition-all duration-300 ease-out
+    ${side === "LONG" ? "left-1 bg-emerald-600/15" : "left-1/2 bg-rose-600/15"}
+  `}
+                />
                 <div className="grid grid-cols-2 gap-1">
                   {/* LONG */}
                   <button
@@ -256,8 +325,11 @@ export default function TradeForm() {
                     value={symbol}
                     onChange={(e) => setSymbol(e.target.value)}
                     placeholder="E.G. XAUUSD"
-                    className={inputCls}
-                    disabled={saving}
+                    className={`${inputCls} ${
+                      isError("symbol")
+                        ? "border-red-500/70 ring-1 ring-red-500/30"
+                        : ""
+                    }`}
                   />
                 </Field>
 
@@ -267,8 +339,11 @@ export default function TradeForm() {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     placeholder="Lots"
-                    className={inputCls}
-                    disabled={saving}
+                    className={`${inputCls} ${
+                      isError("quantity")
+                        ? "border-red-500/70 ring-1 ring-red-500/30"
+                        : ""
+                    }`}
                   />
                 </Field>
 
@@ -288,7 +363,7 @@ export default function TradeForm() {
                     type="number"
                     value={exitPrice}
                     onChange={(e) => setExitPrice(e.target.value)}
-                    placeholder="Optional"
+                    placeholder="0.00"
                     className={inputCls}
                     disabled={saving}
                   />
@@ -310,53 +385,24 @@ export default function TradeForm() {
                 </Field>
 
                 <Field label="SESSION">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => !saving && setSessionOpen((v) => !v)}
-                      disabled={saving}
-                      className={[
-                        "w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm outline-none transition-all",
-                        "bg-zinc-900/60 border-zinc-700 hover:bg-zinc-900/80",
-                        "focus:ring-2 focus:ring-zinc-600/40",
-                        session ? "text-white" : "text-zinc-500",
-                        saving ? "opacity-70 cursor-not-allowed" : "",
-                      ].join(" ")}
-                    >
-                      {session || "Select session"}
-                    </button>
-
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400">
-                      <ChevronDown
-                        size={18}
-                        className={`transition-transform duration-200 ${sessionOpen ? "rotate-180" : ""}`}
-                      />
-                    </span>
-
-                    {sessionOpen && (
-                      <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
-                        {sessions.map((item) => (
-                          <button
-                            key={item}
-                            type="button"
-                            onClick={() => {
-                              setSession(item);
-                              setSessionOpen(false);
-                            }}
-                            className={[
-                              "flex w-full items-center justify-between px-4 py-3 text-sm transition",
-                              "text-zinc-200 hover:bg-white/5",
-                              session === item ? "bg-white/5" : "",
-                            ].join(" ")}
-                          >
-                            <span>{item}</span>
-                            {session === item && (
-                              <Check size={16} className="text-emerald-300" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {["Asian", "London", "New York"].map((item) => (
+                      <motion.button
+                        key={item}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.96 }}
+                        type="button"
+                        onClick={() => setSession(item)}
+                        className={`rounded-xl py-2.5 text-xs font-medium transition-all duration-300 border
+          ${
+            session === item
+              ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.10)]"
+              : "border-white/10 bg-[#121216] text-gray-500 hover:text-gray-300"
+          }`}
+                      >
+                        {item}
+                      </motion.button>
+                    ))}
                   </div>
                 </Field>
 
@@ -464,14 +510,47 @@ export default function TradeForm() {
                   </div>
                 </Field>
 
-                <Field label="EQUITY AFTER TRADE" className="md:col-span-2">
-                  <input
-                    type="number"
-                    value={equityAfter}
-                    onChange={(e) => setEquityAfter(e.target.value)}
-                    className={inputCls}
-                    disabled={saving}
-                  />
+                <Field label="PIPS" className="md:col-span-2">
+                  <div
+                    className={[
+                      `flex h-11 items-center rounded-xl border px-4 transition-all duration-200 bg-[#121216]
+  ${isError("pips") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-white/10"}`,
+                      result === "WIN"
+                        ? "border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                        : result === "LOSS"
+                          ? "border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.15)]"
+                          : "border-white/10",
+                    ].join(" ")}
+                  >
+                    {/* PREFIX */}
+                    <span
+                      className={[
+                        "text-sm font-bold mr-2 transition-colors",
+                        result === "WIN"
+                          ? "text-emerald-400"
+                          : result === "LOSS"
+                            ? "text-rose-400"
+                            : "text-gray-500",
+                      ].join(" ")}
+                    >
+                      <i>P</i>
+                    </span>
+
+                    {/* INPUT */}
+                    <input
+                      type="number"
+                      placeholder="Enter Pips"
+                      value={pips}
+                      onChange={(e) => setPips(e.target.value)}
+                      className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
+                      disabled={saving}
+                    />
+
+                    {/* SUFFIX */}
+                    <span className="text-xs font-medium text-gray-500 ml-2">
+                      pips
+                    </span>
+                  </div>
                 </Field>
 
                 <Field label="TAGS" className="md:col-span-2">
@@ -483,13 +562,14 @@ export default function TradeForm() {
                           if (!saving) {
                             setStrategyOpen((v) => !v);
                             setTimeframeOpen(false);
-                            setSessionOpen(false);
+                            // setSessionOpen(false);
                           }
                         }}
                         disabled={saving}
                         className={[
-                          "w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm outline-none transition-all",
-                          "bg-zinc-900/60 border-zinc-700 hover:bg-zinc-900/80",
+                          `w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm
+bg-zinc-900/60
+${isError("strategy") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-zinc-700"}`,
                           "focus:ring-2 focus:ring-zinc-600/40",
                           strategy ? "text-white" : "text-zinc-500",
                           saving ? "opacity-70 cursor-not-allowed" : "",
@@ -538,12 +618,14 @@ export default function TradeForm() {
                           if (!saving) {
                             setTimeframeOpen((v) => !v);
                             setStrategyOpen(false);
-                            setSessionOpen(false);
+                            // setSessionOpen(false);
                           }
                         }}
                         disabled={saving}
                         className={[
-                          "w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm outline-none transition-all",
+                          `w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm
+                          bg-zinc-900/60
+                          ${isError("timeframe") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-zinc-700"}`,
                           "bg-zinc-900/60 border-zinc-700 hover:bg-zinc-900/80",
                           "focus:ring-2 focus:ring-zinc-600/40",
                           timeframe ? "text-white" : "text-zinc-500",
@@ -588,26 +670,12 @@ export default function TradeForm() {
                   </div>
                 </Field>
 
-                {/* <div className="md:col-span-2">
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4 text-sm text-zinc-400 hover:bg-white/5"
-                    disabled={saving}
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="text-zinc-500">›</span>
-                      Pre-Trade Checklist (Optional)
-                    </span>
-                    <span className="text-zinc-600"> </span>
-                  </button>
-                </div> */}
-
-                <Field label="NOTES" className="md:col-span-2">
+                <Field label="NOTES / TRADE MISTAKES" className="md:col-span-2">
                   <textarea
                     rows={4}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Trade rationale, entry/exit notes..."
+                    placeholder="What went wrong? Psychology, entry mistake, early exit, risk issue..."
                     className={[inputCls, "resize-none py-3"].join(" ")}
                     disabled={saving}
                   />
