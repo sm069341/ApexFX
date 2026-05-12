@@ -477,26 +477,24 @@ export default function Trades() {
         )}
 
         <div className="px-6 pt-2 pb-1">
-  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center sm:text-left">
-    <span className="text-sm font-medium text-zinc-400">
-      Showing{" "}
-      <span className="text-white font-semibold">
-        {filtered.length}
-      </span>{" "}
-      of{" "}
-      <span className="text-white font-semibold">
-        {trades.length}
-      </span>{" "}
-      trades
-    </span>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center sm:text-left">
+            <span className="text-sm font-medium text-zinc-400">
+              Showing{" "}
+              <span className="text-white font-semibold">
+                {filtered.length}
+              </span>{" "}
+              of{" "}
+              <span className="text-white font-semibold">{trades.length}</span>{" "}
+              trades
+            </span>
 
-    <span className="hidden sm:inline text-zinc-600 mx-2">•</span>
+            <span className="hidden sm:inline text-zinc-600 mx-2">•</span>
 
-    <span className="block sm:inline text-xs text-zinc-500 mt-1 sm:mt-0">
-      Page {page} of {totalPages}
-    </span>
-  </div>
-</div>
+            <span className="block sm:inline text-xs text-zinc-500 mt-1 sm:mt-0">
+              Page {page} of {totalPages}
+            </span>
+          </div>
+        </div>
 
         {/* TABLE HEADER + ROWS */}
         <div className="mt-6 px-3 pb-6">

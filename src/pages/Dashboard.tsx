@@ -163,59 +163,59 @@ export default function Dashboard() {
           }
           value={``}
           sub={
-  <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-3">
-    {/* WIN */}
-    <div className="group relative overflow-hidden rounded-xl border border-emerald-500/10 bg-emerald-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+            <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-3">
+              {/* WIN */}
+              <div className="group relative overflow-hidden rounded-xl border border-emerald-500/10 bg-emerald-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-      <div className="relative flex h-full flex-col items-center justify-center text-center">
-        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400/80">
-          Win
-        </div>
+                <div className="relative flex h-full flex-col items-center justify-center text-center">
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400/80">
+                    Win
+                  </div>
 
-        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-emerald-400">
-          {tradeStats.wins}
-        </div>
-      </div>
+                  <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-emerald-400">
+                    {tradeStats.wins}
+                  </div>
+                </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-400/40 transition-all duration-300 group-hover:bg-emerald-400/90" />
-    </div>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-400/40 transition-all duration-300 group-hover:bg-emerald-400/90" />
+              </div>
 
-    {/* LOSS */}
-    <div className="group relative overflow-hidden rounded-xl border border-rose-500/10 bg-rose-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-rose-500/[0.07] hover:border-rose-500/20">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+              {/* LOSS */}
+              <div className="group relative overflow-hidden rounded-xl border border-rose-500/10 bg-rose-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-rose-500/[0.07] hover:border-rose-500/20">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-      <div className="relative flex h-full flex-col items-center justify-center text-center">
-        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-rose-400/80">
-          Loss
-        </div>
+                <div className="relative flex h-full flex-col items-center justify-center text-center">
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-rose-400/80">
+                    Loss
+                  </div>
 
-        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-rose-400">
-          {tradeStats.losses}
-        </div>
-      </div>
+                  <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-rose-400">
+                    {tradeStats.losses}
+                  </div>
+                </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-rose-400/40 transition-all duration-300 group-hover:bg-rose-400/90" />
-    </div>
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-rose-400/40 transition-all duration-300 group-hover:bg-rose-400/90" />
+              </div>
 
-    {/* BE */}
-    <div className="group relative overflow-hidden rounded-xl border border-sky-500/10 bg-sky-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
-      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+              {/* BE */}
+              <div className="group relative overflow-hidden rounded-xl border border-sky-500/10 bg-sky-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-      <div className="relative flex h-full flex-col items-center justify-center text-center">
-        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-sky-400/80">
-          BE
-        </div>
+                <div className="relative flex h-full flex-col items-center justify-center text-center">
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-sky-400/80">
+                    BE
+                  </div>
 
-        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-sky-400">
-          {tradeStats.breakeven}
-        </div>
-      </div>
+                  <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-sky-400">
+                    {tradeStats.breakeven}
+                  </div>
+                </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400/40 transition-all duration-300 group-hover:bg-sky-400/90" />
-    </div>
-  </div>
-}
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400/40 transition-all duration-300 group-hover:bg-sky-400/90" />
+              </div>
+            </div>
+          }
         />
 
         <MetricCard
@@ -231,18 +231,18 @@ export default function Dashboard() {
           }
           value=""
           sub={
-            <div className="mt-2 grid grid-cols-2 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-1.5 sm:gap-2">
               {/* Highest PnL Pair */}
-              <div className="group relative min-h-[80px] overflow-hidden rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] px-3 py-2.5 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
+              <div className="group relative min-h-[72px] sm:min-h-[80px] overflow-hidden rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] px-2 sm:px-3 py-2 sm:py-2.5 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
                 <div className="relative flex h-full flex-col justify-between">
-                  <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-emerald-400/80 text-center">
+                  <div className="text-[7px] sm:text-[8px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.14em] text-emerald-400/80 text-center whitespace-nowrap">
                     Highest P&amp;L Pair
                   </div>
 
-                  <div className="flex flex-1 items-center justify-center">
-                    <div className="text-center text-[20px] leading-none font-black italic tracking-tight text-white">
+                  <div className="flex flex-1 items-center justify-center min-w-0">
+                    <div className="text-center text-[14px] sm:text-[19px] leading-none font-black italic tracking-tight text-white whitespace-nowrap">
                       {bestPair || "—"}
                     </div>
                   </div>
@@ -252,16 +252,16 @@ export default function Dashboard() {
               </div>
 
               {/* Best Strategy */}
-              <div className="group relative min-h-[80px] overflow-hidden rounded-2xl border border-sky-500/10 bg-sky-500/[0.04] px-3 py-2.5 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
+              <div className="group relative min-h-[68px] sm:min-h-[80px] overflow-hidden rounded-2xl border border-sky-500/10 bg-sky-500/[0.04] px-2.5 py-2 sm:px-3 sm:py-2.5 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
                 <div className="relative flex h-full flex-col justify-between">
-                  <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-sky-400/80 text-center">
+                  <div className="text-[7px] sm:text-[8px] font-bold uppercase tracking-[0.08em] sm:tracking-[0.14em] text-sky-400/80 text-center whitespace-nowrap">
                     Best Strategy
                   </div>
 
-                  <div className="flex flex-1 items-center justify-center">
-                    <div className="text-center text-[16px] leading-tight font-black italic uppercase text-sky-300 line-clamp-2 px-1">
+                  <div className="flex flex-1 items-center justify-center min-w-0">
+                    <div className="max-w-full truncate text-center text-[12px] sm:text-[16px] leading-tight font-black italic uppercase text-sky-300 px-1">
                       {bestStrategy || "—"}
                     </div>
                   </div>
