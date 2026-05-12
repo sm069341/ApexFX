@@ -112,23 +112,27 @@ export default function TradeForm() {
     const symForMsg = (symbol || "Trade").toUpperCase().trim() || "Trade";
 
     try {
-      const pnlValue = Number(pnl || 0);
+      const pnlValue = Number(Number(pnl || 0).toFixed(2));
 
-      const normalizedPnl =
-        result === "WIN"
+      const normalizedPnl = Number(
+        (result === "WIN"
           ? Math.abs(pnlValue)
           : result === "LOSS"
             ? -Math.abs(pnlValue)
-            : 0;
+            : 0
+        ).toFixed(2),
+      );
 
-      const pipValue = Number(pips || 0);
+      const pipValue = Number(Number(pips || 0).toFixed(2));
 
-      const normalizedPips =
-        result === "WIN"
+      const normalizedPips = Number(
+        (result === "WIN"
           ? Math.abs(pipValue)
           : result === "LOSS"
             ? -Math.abs(pipValue)
-            : 0;
+            : 0
+        ).toFixed(2),
+      );
 
       await addDoc(collection(db, "trades"), {
         uid: user.uid,
