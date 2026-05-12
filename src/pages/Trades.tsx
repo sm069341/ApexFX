@@ -257,19 +257,13 @@ export default function Trades() {
       <div className="rounded-3xl border border-white/10 bg-zinc-950/40 shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
         {/* Panel header */}
         <div className="flex items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-lg font-semibold text-white">
-              <History
-                size={20}
-                strokeWidth={2.6}
-                className="text-sky-400 shrink-0"
-              />
-              <span>Trade History</span>
-            </div>
-            <div className="text-sm text-zinc-500">
-              {filtered.length} of {trades.length} trades • Page {page} of{" "}
-              {totalPages}
-            </div>
+          <div className="flex items-center gap-2 text-lg font-semibold text-white">
+            <History
+              size={20}
+              strokeWidth={2.6}
+              className="text-sky-400 shrink-0"
+            />
+            <span>Trade History</span>
           </div>
 
           <button
@@ -481,6 +475,28 @@ export default function Trades() {
             </div>
           </div>
         )}
+
+        <div className="px-6 pt-2 pb-1">
+  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center sm:text-left">
+    <span className="text-sm font-medium text-zinc-400">
+      Showing{" "}
+      <span className="text-white font-semibold">
+        {filtered.length}
+      </span>{" "}
+      of{" "}
+      <span className="text-white font-semibold">
+        {trades.length}
+      </span>{" "}
+      trades
+    </span>
+
+    <span className="hidden sm:inline text-zinc-600 mx-2">•</span>
+
+    <span className="block sm:inline text-xs text-zinc-500 mt-1 sm:mt-0">
+      Page {page} of {totalPages}
+    </span>
+  </div>
+</div>
 
         {/* TABLE HEADER + ROWS */}
         <div className="mt-6 px-3 pb-6">
