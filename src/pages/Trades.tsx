@@ -865,7 +865,7 @@ export default function Trades() {
                         {/* 5. STRATEGY / TF */}
                         <div className="px-2 flex flex-col justify-center gap-2">
                           <div className="w-fit bg-white/[0.03] px-3 py-1 rounded-sm">
-                            <span className="text-[15px] font-black italic tracking-[0.08em] text-blue-500 uppercase whitespace-nowrap">
+                            <span className="text-[13px] font-black italic tracking-[0.08em] text-blue-500 uppercase whitespace-nowrap">
                               {Array.isArray(t.tags) && t.tags.length
                                 ? t.tags[0]
                                     ?.split(" ")
