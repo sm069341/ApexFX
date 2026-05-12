@@ -588,7 +588,7 @@ export default function TradeForm() {
                       </span>
 
                       {strategyOpen && (
-                        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
+                        <div className="absolute z-50 mt-2 w-full max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl custom-scrollbar">
                           {strategies.map((item) => (
                             <button
                               key={item}
@@ -645,7 +645,7 @@ export default function TradeForm() {
                       </span>
 
                       {timeframeOpen && (
-                        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl">
+                        <div className="absolute z-50 mt-2 w-full max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-white/10 bg-zinc-950/95 shadow-2xl backdrop-blur-xl custom-scrollbar">
                           {timeframes.map((item) => (
                             <button
                               key={item}
