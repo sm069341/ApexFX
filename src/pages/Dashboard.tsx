@@ -100,7 +100,7 @@ export default function Dashboard() {
     return { total, wins, losses, breakeven };
   }, [trades]);
 
-  const realized = totalPL;
+  // const realized = totalPL;
 
   if (loading) return <DashboardSkeleton />;
 
