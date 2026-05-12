@@ -41,6 +41,8 @@ export default function TradeForm() {
     "TJL-2",
     "SBR",
     "RBS",
+    "DEMAND",
+    "SUPPLY",
     "5Wave Choch",
     "Dual Choch",
   ];
@@ -394,11 +396,11 @@ export default function TradeForm() {
                         type="button"
                         onClick={() => setSession(item)}
                         className={`rounded-xl py-2.5 text-xs font-medium transition-all duration-300 border
-          ${
-            session === item
-              ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.10)]"
-              : "border-white/10 bg-[#121216] text-gray-500 hover:text-gray-300"
-          }`}
+                          ${
+                            session === item
+                              ? "border-cyan-500/20 bg-cyan-500/10 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.10)]"
+                              : "border-white/10 bg-[#121216] text-gray-500 hover:text-gray-300"
+                          }`}
                       >
                         {item}
                       </motion.button>
@@ -514,7 +516,7 @@ export default function TradeForm() {
                   <div
                     className={[
                       `flex h-11 items-center rounded-xl border px-4 transition-all duration-200 bg-[#121216]
-  ${isError("pips") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-white/10"}`,
+                      ${isError("pips") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-white/10"}`,
                       result === "WIN"
                         ? "border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
                         : result === "LOSS"
@@ -568,8 +570,8 @@ export default function TradeForm() {
                         disabled={saving}
                         className={[
                           `w-full rounded-2xl border px-4 py-3 pr-10 text-left text-sm
-bg-zinc-900/60
-${isError("strategy") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-zinc-700"}`,
+                          bg-zinc-900/60
+                          ${isError("strategy") ? "border-red-500/70 ring-1 ring-red-500/30" : "border-zinc-700"}`,
                           "focus:ring-2 focus:ring-zinc-600/40",
                           strategy ? "text-white" : "text-zinc-500",
                           saving ? "opacity-70 cursor-not-allowed" : "",

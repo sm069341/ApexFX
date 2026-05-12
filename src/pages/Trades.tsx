@@ -500,8 +500,8 @@ export default function Trades() {
           ) : (
             <>
               {/* =========================
-        MOBILE (exact accordion UI)
-        ========================= */}
+                  MOBILE (exact accordion UI)
+                  ========================= */}
               <div className="sm:hidden space-y-3">
                 {pageItems.map((t: any) => {
                   const isOpen = openId === t.id;
@@ -566,53 +566,153 @@ export default function Trades() {
                       {/* expanded panel */}
                       {isOpen ? (
                         <div className="px-4 pb-4">
-                          <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                            <div className="grid grid-cols-2 gap-y-3 text-sm">
-                              <div className="text-zinc-500">Date</div>
-                              <div className="text-right text-zinc-500 tabular-nums">
-                                {formatDatePro(t.entryDate)}
+                          <div className="rounded-2xl border border-white/10 bg-black/20 p-4 space-y-4">
+                            {/* Symbol + Date */}
+                            <div className="grid grid-cols-2 items-start">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Symbol
+                                </p>
+                                <p className="text-[16px] font-black text-white uppercase">
+                                  {t.symbol || "-"}
+                                </p>
                               </div>
 
-                              <div className="text-zinc-500">Session</div>
-                              <div className="text-right text-zinc-200 tabular-nums">
-                                {t.session ?? "-"}
+                              <div className="text-right">
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Date
+                                </p>
+                                <p className="text-zinc-200">
+                                  {formatDatePro(t.entryDate)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Direction + Session */}
+                            <div className="grid grid-cols-2 items-start border-t border-white/10 pt-4">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Direction
+                                </p>
+
+                                <span
+                                  className={[
+                                    "inline-flex mt-1 rounded-md border px-3 py-1",
+                                    "text-[11px] font-bold",
+                                    isLong
+                                      ? "border-green-500/20 bg-green-500/10 text-green-300"
+                                      : "border-rose-500/20 bg-rose-500/10 text-rose-300",
+                                  ].join(" ")}
+                                >
+                                  {isLong ? "BUY" : "SELL"}
+                                </span>
                               </div>
 
-                              <div className="text-zinc-500">Entry</div>
-                              <div className="text-right text-zinc-200 tabular-nums">
-                                {t.entryPrice != null
-                                  ? formatPrice(t.symbol, t.entryPrice)
-                                  : "-"}
+                              <div className="text-right">
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Session
+                                </p>
+                                <p className="text-zinc-200">
+                                  {t.session ?? "-"}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Volume + Pips */}
+                            <div className="grid grid-cols-2 items-start border-t border-white/10 pt-4">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Volume
+                                </p>
+                                <p className="text-white font-bold">
+                                  {t.quantity != null
+                                    ? Number(t.quantity).toFixed(2)
+                                    : "-"}{" "}
+                                  <span className="text-zinc-500 text-xs">
+                                    LOTS
+                                  </span>
+                                </p>
                               </div>
 
-                              <div className="text-zinc-500">Exit</div>
-                              <div className="text-right text-zinc-200 tabular-nums">
-                                {t.exitPrice != null &&
-                                Number(t.exitPrice) !== 0
-                                  ? formatPrice(t.symbol, t.exitPrice)
-                                  : "-"}
+                              <div className="text-right">
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Pips
+                                </p>
+
+                                <p
+                                  className={`font-bold ${
+                                    Number(t.pips) < 0
+                                      ? "text-red-500"
+                                      : Number(t.pips) > 0
+                                        ? "text-green-500"
+                                        : "text-zinc-400"
+                                  }`}
+                                >
+                                  {t.pips != null && t.pips !== ""
+                                    ? `${Number(t.pips) > 0 ? "+" : ""}${Math.abs(Number(t.pips))}`
+                                    : "-"}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Entry + Exit */}
+                            <div className="grid grid-cols-2 items-start border-t border-white/10 pt-4">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Entry
+                                </p>
+
+                                <p className="text-white font-semibold">
+                                  {t.entryPrice != null
+                                    ? formatPrice(t.symbol, t.entryPrice)
+                                    : "-"}
+                                </p>
                               </div>
 
-                              <div className="text-zinc-500">Size</div>
-                              <div className="text-right text-zinc-200 tabular-nums">
-                                {t.quantity != null
-                                  ? `${Number(t.quantity).toFixed(2)}`
-                                  : "-"}
+                              <div className="text-right">
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Exit
+                                </p>
+
+                                <p className="text-zinc-300 font-semibold">
+                                  {t.exitPrice != null &&
+                                  Number(t.exitPrice) !== 0
+                                    ? formatPrice(t.symbol, t.exitPrice)
+                                    : "-"}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Strategy + Timeframe */}
+                            <div className="grid grid-cols-2 items-start border-t border-white/10 pt-4">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Strategy
+                                </p>
+
+                                <div className="mt-1 w-fit rounded-md bg-white/[0.04] px-3 py-1">
+                                  <span className="text-blue-400 text-sm font-black italic uppercase">
+                                    {Array.isArray(t.tags) && t.tags.length
+                                      ? t.tags[0]
+                                          ?.split(" ")
+                                          .slice(0, -1)
+                                          .join(" ") || t.tags[0]
+                                      : "-"}
+                                  </span>
+                                </div>
                               </div>
 
-                              <div className="text-zinc-500">Tags</div>
-                              <div className="text-right text-zinc-200">
-                                {Array.isArray(t.tags) && t.tags.length
-                                  ? t.tags.join(", ")
-                                  : "-"}
-                              </div>
+                              <div className="text-right">
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500">
+                                  Timeframe
+                                </p>
 
-                              {/* <div className="text-zinc-500">Source</div>
-                    <div className="flex justify-end">
-                      <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-300">
-                        {t.source ?? "Manual"}
-                      </span>
-                    </div> */}
+                                <p className="text-white font-bold italic">
+                                  {Array.isArray(t.tags) && t.tags.length
+                                    ? t.tags[0]?.split(" ").slice(-1)[0]
+                                    : "-"}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -629,12 +729,35 @@ export default function Trades() {
                 <div className="min-w-[1150px]">
                   {/* Header */}
                   <div className="grid grid-cols-[200px_200px_170px_190px_200px_120px] border-b border-white/10 pb-3 text-[11px] font-semibold tracking-[0.18em] text-zinc-500">
-                    <div className="px-2 uppercase">SYMBOL & DATE</div>
-                    <div className="px-2 uppercase">DIRECTION & SESSION</div>
-                    <div className="px-2 uppercase">VOLUME & PIPS</div>
-                    <div className="px-2 uppercase">ENTRY & EXIT</div>
-                    <div className="px-2 uppercase">STRATEGY & TIMEFRAME</div>
-                    <div className="px-2 text-right uppercase">RESULT</div>
+                    <div className="px-2 flex flex-col leading-tight uppercase">
+                      <span>SYMBOL</span>
+                      <span className="text-zinc-600">DATE</span>
+                    </div>
+
+                    <div className="px-2 flex flex-col leading-tight uppercase">
+                      <span>DIRECTION</span>
+                      <span className="text-zinc-600">SESSION</span>
+                    </div>
+
+                    <div className="px-2 flex flex-col leading-tight uppercase">
+                      <span>VOLUME</span>
+                      <span className="text-zinc-600">PIPS</span>
+                    </div>
+
+                    <div className="px-2 flex flex-col leading-tight uppercase">
+                      <span>ENTRY</span>
+                      <span className="text-zinc-600">EXIT</span>
+                    </div>
+
+                    <div className="px-2 flex flex-col leading-tight uppercase">
+                      <span>STRATEGY</span>
+                      <span className="text-zinc-600">TIMEFRAME</span>
+                    </div>
+
+                    <div className="px-2 flex flex-col items-end leading-tight uppercase text-right">
+                      <span>RESULT</span>
+                      {/* <span className="text-zinc-600">STATUS</span> */}
+                    </div>
                   </div>
 
                   {/* Rows */}
@@ -642,10 +765,10 @@ export default function Trades() {
                     {pageItems.map((t: any) => (
                       <div
                         key={t.id}
-                        className="grid grid-cols-[200px_200px_170px_190px_200px_120px] items-center py-5 text-sm text-zinc-200 hover:bg-white/5 cursor-pointer"
+                        className="grid grid-cols-[200px_200px_170px_190px_200px_120px] items-center py-5 border-b border-white/10 text-sm text-zinc-200 hover:bg-white/5 cursor-pointer"
                       >
-                        {/* 1. Symbol & Date */}
-                        <div className="px-2 flex flex-col">
+                        {/* 1. SYMBOL / DATE */}
+                        <div className="px-2 flex flex-col justify-center">
                           <span className="text-[17px] font-extrabold tracking-tight text-white uppercase">
                             {t.symbol || "-"}
                           </span>
@@ -655,14 +778,10 @@ export default function Trades() {
                           </span>
                         </div>
 
-                        {/* 2. DIRECTION & SESSION */}
-                        <div
-                          style={{ width: "15%" }}
-                          className="flex flex-col justify-center"
-                        >
-                          {/* BUY / SELL */}
+                        {/* 2. DIRECTION / SESSION */}
+                        <div className="px-2 flex flex-col justify-center">
                           <div
-                            className={`px-3 py-1 border text-[12px] font-black italic w-fit rounded-sm tracking-widest transition-colors
+                            className={`px-3 py-1 border text-[12px] font-black italic w-fit rounded-sm tracking-widest
                               ${
                                 t.side === "BUY"
                                   ? "border-green-500/40 text-green-500 bg-green-500/2"
@@ -671,82 +790,71 @@ export default function Trades() {
                           >
                             {t.side}
                           </div>
-                          {/* Session */}
+
                           <span className="mt-1 text-[11px] font-medium uppercase text-zinc-500 whitespace-nowrap">
                             {t.session ?? "NEW YORK SESSION"}
                           </span>
                         </div>
 
                         {/* 3. VOLUME / PIPS */}
-                        <div
-                          style={{ width: "18%" }}
-                          className="flex flex-col whitespace-nowrap"
-                        >
-                          {/* Volume */}
-                          <span className="text-[14px] font-black text-white italic tracking-tight whitespace-nowrap">
+                        <div className="px-2 flex flex-col justify-center whitespace-nowrap">
+                          <span className="text-[14px] font-black text-white italic tracking-tight">
                             {t.quantity != null
                               ? Number(t.quantity).toFixed(2)
                               : "-"}{" "}
-                            <span className="ml-0.5 text-[10px] font-bold not-italic text-zinc-500">
+                            <span className="text-[10px] font-bold not-italic text-zinc-500">
                               LOTS
                             </span>
                           </span>
 
-                          {/* Pips */}
-<span
-  className={`mt-1 text-[10px] font-black tracking-wide whitespace-nowrap ${
-    Number(t.pips) < 0
-      ? "text-red-500/90"
-      : Number(t.pips) > 0
-        ? "text-green-500/90"
-        : "text-zinc-500"
-  }`}
->
-  {t.pips != null && t.pips !== ""
-    ? `${Number(t.pips) > 0 ? "+" : ""}${Math.abs(Number(t.pips))}`
-    : "-"}{" "}
-  <span className="ml-0.5 text-[10px] opacity-50">PIPS</span>
-</span>
+                          <span
+                            className={`mt-1 text-[10px] font-black tracking-wide
+                              ${
+                                Number(t.pips) < 0
+                                  ? "text-red-500/90"
+                                  : Number(t.pips) > 0
+                                    ? "text-green-500/90"
+                                    : "text-zinc-500"
+                              }`}
+                          >
+                            {t.pips != null && t.pips !== ""
+                              ? `${Number(t.pips) > 0 ? "+" : ""}${Math.abs(Number(t.pips))}`
+                              : "-"}
+                            <span className="ml-1 opacity-50">PIPS</span>
+                          </span>
                         </div>
 
                         {/* 4. ENTRY / EXIT */}
-                        <div
-                          style={{ width: "22%" }}
-                          className="flex justify-start items-center"
-                        >
+                        <div className="px-0 flex items-center">
                           <div className="flex items-center gap-3">
-                            {/* dots + line */}
-                            <div className="flex shrink-0 flex-col items-center gap-1">
+                            <div className="flex flex-col items-center gap-1 shrink-0">
                               <div className="h-1 w-1 rounded-full bg-sky-400 shadow-[0_0_5px_#38bdf8]" />
                               <div className="h-3 w-[1px] bg-white/10" />
                               <div className="h-1 w-1 rounded-full bg-zinc-600" />
                             </div>
 
-                            {/* prices */}
                             <div className="flex flex-col gap-1.5">
-                              {/* Entry */}
-                              <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                                <span className="text-[13px] font-black italic tracking-tighter text-white">
+                              <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-[15px] font-black italic tracking-tighter text-white">
                                   {t.entryPrice != null
                                     ? formatPrice(t.symbol, t.entryPrice)
                                     : "-"}
                                 </span>
 
-                                <span className="text-[7px] font-black uppercase tracking-widest text-sky-400/70">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-sky-400/70">
                                   ENTRY
                                 </span>
                               </div>
 
-                              {/* Exit */}
-                              <div className="flex items-center gap-2 leading-none whitespace-nowrap">
-                                <span className="text-[13px] font-black italic tracking-tighter text-zinc-500">
+                              <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-[15px] font-black italic tracking-tighter text-zinc-400">
                                   {t.exitPrice != null &&
                                   Number(t.exitPrice) !== 0
                                     ? formatPrice(t.symbol, t.exitPrice)
                                     : "-"}
                                 </span>
 
-                                <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600 opacity-60">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 opacity-80">
                                   EXIT
                                 </span>
                               </div>
@@ -755,42 +863,29 @@ export default function Trades() {
                         </div>
 
                         {/* 5. STRATEGY / TF */}
-                        <div
-                          style={{ width: "17%" }}
-                          className="flex flex-col justify-center gap-2 pl-4"
-                        >
-                          {/* Strategy */}
-                          <div className="w-fit">
-                            <div className="bg-white/[0.03] px-3 py-1 rounded-sm">
-                              <span className="whitespace-nowrap text-[12px] font-black italic tracking-[0.08em] text-blue-500 uppercase">
-                                {Array.isArray(t.tags) && t.tags.length
-                                  ? t.tags[0]
-                                      ?.split(" ")
-                                      .slice(0, -1)
-                                      .join(" ") || t.tags[0]
-                                  : "-"}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* TF */}
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-black uppercase tracking-[0.12em] text-white whitespace-nowrap italic">
+                        <div className="px-2 flex flex-col justify-center gap-2">
+                          <div className="w-fit bg-white/[0.03] px-3 py-1 rounded-sm">
+                            <span className="text-[15px] font-black italic tracking-[0.08em] text-blue-500 uppercase whitespace-nowrap">
                               {Array.isArray(t.tags) && t.tags.length
-                                ? t.tags[0]?.split(" ").slice(-1)[0]
+                                ? t.tags[0]
+                                    ?.split(" ")
+                                    .slice(0, -1)
+                                    .join(" ") || t.tags[0]
                                 : "-"}
                             </span>
-
-                            <span className="text-[8px] font-black uppercase tracking-[0.16em] text-zinc-300/50">
-                              TF
-                            </span>
                           </div>
+
+                          <span className="text-[10px] px-3 font-black uppercase tracking-[0.12em] text-white italic whitespace-nowrap">
+                            {Array.isArray(t.tags) && t.tags.length
+                              ? t.tags[0]?.split(" ").slice(-1)[0]
+                              : "-"}
+                          </span>
                         </div>
 
-                        {/* 6. Result */}
+                        {/* 6. RESULT */}
                         <div
                           className={[
-                            "px-2 text-right font-semibold",
+                            "px-2 text-right text-[15px] font-bold",
                             Number(t.pnl) >= 0
                               ? "text-green-500"
                               : "text-red-500",

@@ -874,142 +874,192 @@ export default function Analysis() {
          ========================= */}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        {/* Long vs Short */}
-        <Panel>
-          <div className="flex items-center gap-2 text-lg font-semibold text-white">
-            <ArrowUpDown
-              size={20}
-              strokeWidth={2.6}
-              className="text-sky-400 shrink-0"
-            />
-            <span>Long vs Short</span>
-          </div>
-          <div className="text-sm text-zinc-500">
-            Performance by trade direction
-          </div>
 
-          <div className="mt-4 space-y-3">
-            <DirCard
-              title="Long"
-              count={longShort.long.count}
-              pnl={longShort.long.pnl}
-              winRate={longShort.long.winRate}
-            />
-
-            <DirCard
-              title="Short"
-              count={longShort.short.count}
-              pnl={longShort.short.pnl}
-              winRate={longShort.short.winRate}
-            />
-          </div>
-        </Panel>
-
-        {/* Day Performance */}
-        <Panel>
-          <div className="flex items-center gap-2 text-lg font-semibold text-white">
-            <CalendarDays
-              size={20}
-              strokeWidth={2.6}
-              className="text-sky-400 shrink-0"
-            />
-            <span>Day Performance</span>
-          </div>
-          <div className="text-sm text-zinc-500">
-            Find your best trading days
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {dayPerf.map((d) => {
-              const barClass =
-                d.tone === "profit"
-                  ? "bg-emerald-500"
-                  : d.tone === "loss"
-                    ? "bg-rose-500"
-                    : "bg-sky-500";
-
-              const valueClass =
-                d.tone === "profit"
-                  ? "text-emerald-500"
-                  : d.tone === "loss"
-                    ? "text-rose-500"
-                    : "text-sky-500";
-
-              return (
-                <div key={d.label} className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-9 sm:w-10 text-[12px] sm:text-sm text-zinc-400">
-                    {d.label}
-                  </div>
-
-                  <div className="relative h-9 flex-1 rounded-xl border border-white/10 bg-black/20 overflow-hidden">
-                    <div
-                      className={`absolute inset-y-0 left-0 rounded-xl ${barClass}`}
-                      style={{
-                        width: `${clamp(d.widthPct, 2, 100)}%`,
-                        opacity: d.value === 0 ? 0.35 : 0.9,
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    className={`w-16 sm:w-20 text-right text-[17px] sm:text-sm font-bold ${valueClass} tabular-nums`}
-                  >
-                    {d.value === 0 ? "+$0.00" : formatK(d.value)}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Panel>
-
-        {/* Top Symbols */}
-        <Panel>
-          <div className="flex items-center gap-2 text-lg font-semibold text-white">
-            <Trophy
-              size={20}
-              strokeWidth={2.6}
-              className="text-sky-400 shrink-0"
-            />
-            <span>Top Symbols</span>
-          </div>
-          <div className="text-sm text-zinc-500">Best performing assets</div>
-
-          <div className="mt-4 space-y-3">
-            {topSymbols.length === 0 ? (
-              <div className="text-sm text-zinc-500">No data</div>
-            ) : (
-              topSymbols.map((s, idx) => (
-                <div
-                  key={s.symbol}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-8 w-8 place-items-center rounded-xl bg-sky-600/20 text-sky-300 text-sm font-semibold">
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-white">{s.symbol}</div>
-                      <div className="text-xs text-zinc-500">
-                        {s.count} trades • {(s.winRate * 100).toFixed(0)}% win
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`text-right font-extrabold ${
-                      s.pnl >= 0 ? "text-blue-600" : "text-rose-600"
-                    }`}
-                  >
-                    {s.pnl >= 0
-                      ? `+$${Math.abs(s.pnl).toFixed(2)}`
-                      : `-$${Math.abs(s.pnl).toFixed(2)}`}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Panel>
+  {/* Long vs Short */}
+  <Panel>
+    <div className="flex items-center gap-2">
+      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border-white/10">
+        <ArrowUpDown
+          size={18}
+          strokeWidth={2.5}
+          className="text-zinc-300"
+        />
       </div>
+
+      <div>
+        <div className="text-lg font-bold text-white">
+          Long vs Short
+        </div>
+        <div className="text-xs text-zinc-500">
+          Performance by trade direction
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4 grid gap-3">
+      <DirCard
+        title="Long"
+        count={longShort.long.count}
+        pnl={longShort.long.pnl}
+        winRate={longShort.long.winRate}
+      />
+
+      <DirCard
+        title="Short"
+        count={longShort.short.count}
+        pnl={longShort.short.pnl}
+        winRate={longShort.short.winRate}
+      />
+    </div>
+  </Panel>
+
+  {/* Day Performance */}
+  <Panel>
+    <div className="flex items-center gap-2">
+      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border-white/10">
+        <CalendarDays
+          size={18}
+          strokeWidth={2.5}
+          className="text-zinc-300"
+        />
+      </div>
+
+      <div>
+        <div className="text-lg font-bold text-white">
+          Day Performance
+        </div>
+        <div className="text-xs text-zinc-500">
+          Find your best trading days
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4 space-y-3">
+      {dayPerf.map((d) => {
+        const barClass =
+          d.tone === "profit"
+            ? "bg-emerald-400/70"
+            : d.tone === "loss"
+            ? "bg-rose-400/70"
+            : "bg-zinc-500/60";
+
+        const valueClass =
+          d.tone === "profit"
+            ? "text-emerald-500 font-bold"
+            : d.tone === "loss"
+            ? "text-rose-500 font-bold"
+            : "text-zinc-500 font-bold";
+
+        return (
+          <div
+            key={d.label}
+            className="rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium text-zinc-300">
+                {d.label}
+              </span>
+
+              <span
+                className={`text-sm font-bold tabular-nums ${valueClass}`}
+              >
+                {d.value === 0
+                  ? "+$0.00"
+                  : formatK(d.value)}
+              </span>
+            </div>
+
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
+              <div
+                className={`h-full rounded-full ${barClass}`}
+                style={{
+                  width: `${clamp(d.widthPct, 2, 100)}%`,
+                  opacity: d.value === 0 ? 0.35 : 0.9,
+                }}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </Panel>
+
+  {/* Top Symbols */}
+  <Panel>
+    <div className="flex items-center gap-2">
+      <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/[0.04] border-white/10">
+        <Trophy
+          size={18}
+          strokeWidth={2.5}
+          className="text-zinc-300"
+        />
+      </div>
+
+      <div>
+        <div className="text-lg font-bold text-white">
+          Top Symbols
+        </div>
+        <div className="text-xs text-zinc-500">
+          Best performing assets
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-4 space-y-3">
+      {topSymbols.length === 0 ? (
+        <div className="text-sm text-zinc-500">
+          No data
+        </div>
+      ) : (
+        topSymbols.map((s, idx) => (
+          <div
+            key={s.symbol}
+            className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.05]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/[0.05] border border-white/10 text-zinc-300 text-sm font-bold">
+                  #{idx + 1}
+                </div>
+
+                <div>
+                  <div className="font-bold text-white">
+                    {s.symbol}
+                  </div>
+
+                  <div className="text-xs text-zinc-500">
+                    {s.count} trades •{" "}
+                    {(s.winRate * 100).toFixed(0)}% win
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`text-right text-sm font-black tabular-nums ${
+                  s.pnl >= 0
+                    ? "text-emerald-500"
+                    : "text-rose-500"
+                }`}
+              >
+                {s.pnl >= 0
+                  ? `+$${Math.abs(s.pnl).toFixed(2)}`
+                  : `-$${Math.abs(s.pnl).toFixed(2)}`}
+              </div>
+            </div>
+
+            <div
+              className={`absolute bottom-0 left-0 right-0 h-[2px] ${
+                s.pnl >= 0
+                  ? "bg-emerald-400/25"
+                  : "bg-rose-400/25"
+              }`}
+            />
+          </div>
+        ))
+      )}
+    </div>
+  </Panel>
+</div>
 
       {/* Session Performance (full width like screenshot) */}
       <Panel>
@@ -1087,10 +1137,10 @@ export default function Analysis() {
                   className={[
                     "h-2 rounded-full transition-all duration-300",
                     s.pnl > 0
-                      ? "bg-blue-500"
+                      ? "bg-emerald-400/700"
                       : s.pnl < 0
-                        ? "bg-rose-500"
-                        : "bg-blue-500",
+                        ? "bg-rose-400/70"
+                        : "bg-zinc-500/60",
                   ].join(" ")}
                   style={{ width: `${clamp(s.barPct, 2, 100)}%` }}
                 />
@@ -1346,7 +1396,7 @@ function DirCard({
 }) {
   const isLong = title === "Long";
 
-  const leftLine = isLong ? "bg-emerald-500" : "bg-rose-500";
+  const leftLine = isLong ? "bg-emerald-400/70" : "bg-rose-400/70";
   const icon = isLong ? (
     <ArrowUpRight size={18} />
   ) : (

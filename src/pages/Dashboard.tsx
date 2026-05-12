@@ -104,6 +104,34 @@ export default function Dashboard() {
 
   if (loading) return <DashboardSkeleton />;
 
+  const pairStats = trades.reduce<Record<string, number>>((acc, trade: any) => {
+    const symbol = trade.symbol || "Unknown";
+
+    acc[symbol] = (acc[symbol] || 0) + Number(trade.pnl || 0);
+
+    return acc;
+  }, {});
+
+  const bestPair =
+    Object.entries(pairStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+  const strategyStats = trades.reduce<Record<string, number>>(
+    (acc, trade: any) => {
+      const strategy =
+        Array.isArray(trade.tags) && trade.tags.length
+          ? trade.tags[0]?.split(" ").slice(0, -1).join(" ") || trade.tags[0]
+          : "Unknown";
+
+      acc[strategy] = (acc[strategy] || 0) + Number(trade.pnl || 0);
+
+      return acc;
+    },
+    {},
+  );
+
+  const bestStrategy =
+    Object.entries(strategyStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
   return (
     <div className="space-y-6">
       {/* ===== Top metric cards (4) ===== */}
@@ -135,80 +163,114 @@ export default function Dashboard() {
           }
           value={``}
           sub={
-            <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-3">
-              {/* WIN */}
-              <div className="group relative rounded-lg sm:rounded-xl border border-white/10 bg-white/[0.045] p-2 sm:p-3 text-center transition-all duration-200 hover:bg-white/[0.07] hover:-translate-y-[1px] hover:border-white/15">
-                <div className="pointer-events-none absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-b from-white/[0.05] to-transparent" />
+  <div className="mt-3 grid grid-cols-3 gap-1.5 sm:gap-3">
+    {/* WIN */}
+    <div className="group relative overflow-hidden rounded-xl border border-emerald-500/10 bg-emerald-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-                <div className="relative text-[8px] sm:text-xs font-semibold text-zinc-500 tracking-widest">
-                  WIN
-                </div>
+      <div className="relative flex h-full flex-col items-center justify-center text-center">
+        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400/80">
+          Win
+        </div>
 
-                <div className="relative mt-0.5 sm:mt-1 text-sm sm:text-2xl font-bold text-emerald-500 tabular-nums">
-                  {tradeStats.wins}
-                </div>
+        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-emerald-400">
+          {tradeStats.wins}
+        </div>
+      </div>
 
-                {/* accent line */}
-                <div className="absolute bottom-0 left-[1px] right-[1px] h-[2px] overflow-hidden rounded-b-md sm:rounded-b-lg">
-                  <div className="h-full w-full bg-emerald-400/30 transition-all duration-300 group-hover:bg-emerald-400/80" />
-                </div>
-              </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-400/40 transition-all duration-300 group-hover:bg-emerald-400/90" />
+    </div>
 
-              {/* LOSS */}
-              <div className="group relative rounded-lg sm:rounded-xl border border-white/10 bg-white/[0.045] p-2 sm:p-3 text-center transition-all duration-200 hover:bg-white/[0.07] hover:-translate-y-[1px] hover:border-white/15">
-                <div className="pointer-events-none absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-b from-white/[0.05] to-transparent" />
+    {/* LOSS */}
+    <div className="group relative overflow-hidden rounded-xl border border-rose-500/10 bg-rose-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-rose-500/[0.07] hover:border-rose-500/20">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-                <div className="relative text-[8px] sm:text-xs font-semibold text-zinc-500 tracking-widest">
-                  LOSS
-                </div>
+      <div className="relative flex h-full flex-col items-center justify-center text-center">
+        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-rose-400/80">
+          Loss
+        </div>
 
-                <div className="relative mt-0.5 sm:mt-1 text-sm sm:text-2xl font-bold text-rose-500 tabular-nums">
-                  {tradeStats.losses}
-                </div>
+        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-rose-400">
+          {tradeStats.losses}
+        </div>
+      </div>
 
-                {/* accent line */}
-                <div className="absolute bottom-0 left-[1px] right-[1px] h-[2px] overflow-hidden rounded-b-md sm:rounded-b-lg">
-                  <div className="h-full w-full bg-rose-400/30 transition-all duration-300 group-hover:bg-rose-400/80" />
-                </div>
-              </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-rose-400/40 transition-all duration-300 group-hover:bg-rose-400/90" />
+    </div>
 
-              {/* BE */}
-              <div className="group relative rounded-lg sm:rounded-xl border border-white/10 bg-white/[0.045] p-2 sm:p-3 text-center transition-all duration-200 hover:bg-white/[0.07] hover:-translate-y-[1px] hover:border-white/15">
-                <div className="pointer-events-none absolute inset-0 rounded-lg sm:rounded-xl bg-gradient-to-b from-white/[0.05] to-transparent" />
+    {/* BE */}
+    <div className="group relative overflow-hidden rounded-xl border border-sky-500/10 bg-sky-500/[0.04] p-2 sm:p-3 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
-                <div className="relative text-[8px] sm:text-xs font-semibold text-zinc-500 tracking-widest">
-                  BE
-                </div>
+      <div className="relative flex h-full flex-col items-center justify-center text-center">
+        <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-sky-400/80">
+          BE
+        </div>
 
-                <div className="relative mt-0.5 sm:mt-1 text-sm sm:text-2xl font-bold text-blue-500 tabular-nums">
-                  {tradeStats.breakeven}
-                </div>
+        <div className="mt-0.5 text-sm sm:text-2xl font-black italic tabular-nums text-sky-400">
+          {tradeStats.breakeven}
+        </div>
+      </div>
 
-                {/* accent line */}
-                <div className="absolute bottom-0 left-[1px] right-[1px] h-[2px] overflow-hidden rounded-b-md sm:rounded-b-lg">
-                  <div className="h-full w-full bg-blue-400/30 transition-all duration-300 group-hover:bg-blue-400/80" />
-                </div>
-              </div>
-            </div>
-          }
+      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400/40 transition-all duration-300 group-hover:bg-sky-400/90" />
+    </div>
+  </div>
+}
         />
 
         <MetricCard
-          title="REALIZED"
-          iconBg="bg-sky-500/15"
+          title="TRADING EDGE"
+          iconBg="bg-violet-500/15"
           tone="green"
           icon={
             <CheckCircle2
               size={30}
               strokeWidth={2.5}
-              className={realized >= 0 ? "text-emerald-300" : "text-rose-300"}
+              className="text-violet-300"
             />
           }
-          value={`${realized >= 0 ? "+" : "-"}${money(Math.abs(realized))}`}
+          value=""
           sub={
-            <span className="text-zinc-500">{trades.length} closed trades</span>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              {/* Highest PnL Pair */}
+              <div className="group relative min-h-[80px] overflow-hidden rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] px-3 py-2.5 transition-all duration-200 hover:bg-emerald-500/[0.07] hover:border-emerald-500/20">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-emerald-400/80 text-center">
+                    Highest P&amp;L Pair
+                  </div>
+
+                  <div className="flex flex-1 items-center justify-center">
+                    <div className="text-center text-[20px] leading-none font-black italic tracking-tight text-white">
+                      {bestPair || "—"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-emerald-400/50 group-hover:bg-emerald-400" />
+              </div>
+
+              {/* Best Strategy */}
+              <div className="group relative min-h-[80px] overflow-hidden rounded-2xl border border-sky-500/10 bg-sky-500/[0.04] px-3 py-2.5 transition-all duration-200 hover:bg-sky-500/[0.07] hover:border-sky-500/20">
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.04] to-transparent" />
+
+                <div className="relative flex h-full flex-col justify-between">
+                  <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-sky-400/80 text-center">
+                    Best Strategy
+                  </div>
+
+                  <div className="flex flex-1 items-center justify-center">
+                    <div className="text-center text-[16px] leading-tight font-black italic uppercase text-sky-300 line-clamp-2 px-1">
+                      {bestStrategy || "—"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-sky-400/50 group-hover:bg-sky-400" />
+              </div>
+            </div>
           }
-          accent="sky"
         />
 
         <MetricCard
@@ -372,9 +434,9 @@ function MetricCard({
   badge?: string;
   icon: React.ReactNode;
   iconBg: string;
-  value: string;
+  value: React.ReactNode;
   sub?: React.ReactNode;
-  accent?: "sky";
+  accent?: "sky" | "violet" | "green";
   highlight?: boolean;
   tone?: "blue" | "green" | "amber" | "rose";
 }) {
@@ -446,7 +508,13 @@ function MetricCard({
             "mt-2 text-3xl sm:text-4xl font-bold tracking-tight",
             "transition-transform duration-300 ease-out",
             "group-hover:translate-y-[-1px]",
-            accent === "sky" ? "text-blue-500" : "text-white",
+            accent === "sky"
+              ? "text-blue-500"
+              : accent === "violet"
+                ? "text-violet-400"
+                : accent === "green"
+                  ? "text-emerald-400"
+                  : "text-white",
           ].join(" ")}
         >
           {value}
@@ -548,8 +616,7 @@ function PerformanceChart({
       })
       .sort(
         (a: any, b: any) =>
-          a.__date.getTime() - b.__date.getTime() ||
-          a.__created - b.__created,
+          a.__date.getTime() - b.__date.getTime() || a.__created - b.__created,
       );
   }, [trades, rangeStart]);
 
@@ -824,7 +891,7 @@ function PerformanceChart({
                     : "rgba(244,63,94,0.9)"
                 }
                 strokeWidth={7}
-                strokeOpacity={0.10}
+                strokeOpacity={0.1}
                 dot={false}
                 activeDot={false}
                 isAnimationActive
