@@ -102,6 +102,23 @@ export default function Dashboard() {
 
   // const realized = totalPL;
 
+  const bestStrategyWithTf = useMemo(() => {
+    const strategyMap: Record<string, number> = {};
+
+    trades.forEach((t: any) => {
+      const tag = t.tags?.[0];
+
+      // tag looks like: "A+ 15m"
+      if (!tag) return;
+
+      strategyMap[tag] = (strategyMap[tag] || 0) + Number(t.pnl || 0);
+    });
+
+    const best = Object.entries(strategyMap).sort((a, b) => b[1] - a[1])[0];
+
+    return best?.[0] || "";
+  }, [trades]);
+
   if (loading) return <DashboardSkeleton />;
 
   const pairStats = trades.reduce<Record<string, number>>((acc, trade: any) => {
@@ -115,22 +132,19 @@ export default function Dashboard() {
   const bestPair =
     Object.entries(pairStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
 
-  const strategyStats = trades.reduce<Record<string, number>>(
-    (acc, trade: any) => {
-      const strategy =
-        Array.isArray(trade.tags) && trade.tags.length
-          ? trade.tags[0]?.split(" ").slice(0, -1).join(" ") || trade.tags[0]
-          : "Unknown";
+  // const strategyStats = trades.reduce<Record<string, number>>(
+  //   (acc, trade: any) => {
+  //     const strategy =
+  //       Array.isArray(trade.tags) && trade.tags.length
+  //         ? trade.tags[0]?.split(" ").slice(0, -1).join(" ") || trade.tags[0]
+  //         : "Unknown";
 
-      acc[strategy] = (acc[strategy] || 0) + Number(trade.pnl || 0);
+  //     acc[strategy] = (acc[strategy] || 0) + Number(trade.pnl || 0);
 
-      return acc;
-    },
-    {},
-  );
-
-  const bestStrategy =
-    Object.entries(strategyStats).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+  //     return acc;
+  //   },
+  //   {},
+  // );
 
   return (
     <div className="space-y-6">
@@ -260,9 +274,9 @@ export default function Dashboard() {
                     Best Strategy
                   </div>
 
-                  <div className="flex flex-1 items-center justify-center min-w-0">
-                    <div className="max-w-full truncate text-center text-[12px] sm:text-[16px] leading-tight font-black italic uppercase text-sky-300 px-1">
-                      {bestStrategy || "—"}
+                  <div className="flex flex-1 items-center justify-center px-1 min-w-0">
+                    <div className="text-center text-[10px] sm:text-[16px] leading-tight font-black italic uppercase text-sky-300 break-words">
+                      {bestStrategyWithTf || "—"}
                     </div>
                   </div>
                 </div>
