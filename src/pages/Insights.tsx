@@ -14,7 +14,7 @@ import {
   Target,
   DollarSign,
   Coins,
-  Clock,
+  // Clock,
 } from "lucide-react";
 
 /* =========================
@@ -1084,7 +1084,7 @@ function Metric({
 function InsightCard({
   title,
   text,
-  index,
+  // index,
   icon,
   tone,
   badge,
