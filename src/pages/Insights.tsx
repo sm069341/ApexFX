@@ -505,8 +505,9 @@ export default function Insights() {
     const list: {
       title: string;
       text: string;
-      tone: "blue" | "green" | "amber" | "rose";
+      tone: "blue" | "green" | "amber" | "rose" | "purple";
       icon: React.ReactNode;
+      badge: string;
     }[] = [];
 
     const bestStrategy = strategyPerf
@@ -516,6 +517,7 @@ export default function Insights() {
     if (bestStrategy) {
       list.push({
         title: "Best Strategy",
+        badge: "EDGE",
         text: `${bestStrategy.tag} performs best with ${bestStrategy.winRate.toFixed(
           0,
         )}% win rate over ${bestStrategy.count} trades.`,
@@ -531,6 +533,7 @@ export default function Insights() {
     if (worstSymbol) {
       list.push({
         title: "Worst Symbol",
+        badge: "RISK",
         text: `You lose most on ${worstSymbol.symbol} with net P&L of ${formatK(
           worstSymbol.pnl,
         )}.`,
@@ -548,8 +551,9 @@ export default function Insights() {
     if (bestTfInsight) {
       list.push({
         title: "Best Timeframe",
+        badge: "TIMING",
         text: `Your best timeframe for ${bestTfInsight.strategy} is ${bestTfInsight.timeframe} with ${bestTfInsight.winRate.toFixed(0)}% win rate.`,
-        tone: "blue",
+        tone: "amber",
         icon: <Sparkles size={18} />,
       });
     }
@@ -560,8 +564,9 @@ export default function Insights() {
     if (bestSessionInsight) {
       list.push({
         title: "Best Session Setup",
+        badge: "SETUP",
         text: `You perform best with ${bestSessionInsight.strategy} during ${bestSessionInsight.session} session with ${bestSessionInsight.winRate.toFixed(0)}% win rate.`,
-        tone: "green",
+        tone: "purple",
         icon: <Sparkles size={18} />,
       });
     }
@@ -569,6 +574,7 @@ export default function Insights() {
     if (bestSession) {
       list.push({
         title: "Best Session",
+        badge: "SESSION",
         text: `${bestSession.name} session gives your best performance with ${formatK(
           bestSession.pnl,
         )} net P&L.`,
@@ -580,6 +586,7 @@ export default function Insights() {
     if (overtradingInsight?.isWorse) {
       list.push({
         title: "Overtrading Warning",
+        badge: "RISK",
         text: "Your results drop on days when you take more than 3 trades.",
         tone: "amber",
         icon: <Brain size={18} />,
@@ -589,6 +596,7 @@ export default function Insights() {
     if (streakInsight) {
       list.push({
         title: "Loss Streak Insight",
+        badge: "RISK",
         text: `After 2 consecutive losses, your next trade loses ${streakInsight.rate.toFixed(
           0,
         )}% of the time.`,
@@ -600,6 +608,7 @@ export default function Insights() {
     if (!list.length && filteredTrades.length) {
       list.push({
         title: "Need More Data",
+        badge: "NO DATA",
         text: "Add more trades to unlock stronger insight patterns.",
         tone: "blue",
         icon: <Sparkles size={18} />,
@@ -795,10 +804,13 @@ export default function Insights() {
           ) : (
             insights.map((item, i) => (
               <InsightCard
-                key={i}
+                key={item.title}
                 index={i}
                 title={item.title}
                 text={item.text}
+                icon={item.icon}
+                tone={item.tone}
+                badge={item.badge}
               />
             ))
           )}
@@ -833,26 +845,24 @@ export default function Insights() {
 
             {strategyPerf.slice(0, 8).map((s) => (
               <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
-  <div className="col-span-6 text-zinc-200 truncate">
-    {s.tag}
-  </div>
+                <div className="col-span-6 text-zinc-200 truncate">{s.tag}</div>
 
-  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
-    {s.count}
-  </div>
+                <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+                  {s.count}
+                </div>
 
-  <div className="col-span-2 text-right text-zinc-400 px-2">
-    {s.winRate.toFixed(0)}%
-  </div>
+                <div className="col-span-2 text-right text-zinc-400 px-2">
+                  {s.winRate.toFixed(0)}%
+                </div>
 
-  <div
-    className={`col-span-2 text-right font-semibold pl-2 ${
-      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
-    }`}
-  >
-    {formatK(s.pnl)}
-  </div>
-</div>
+                <div
+                  className={`col-span-2 text-right font-semibold pl-2 ${
+                    s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+                  }`}
+                >
+                  {formatK(s.pnl)}
+                </div>
+              </div>
             ))}
           </div>
         </Panel>
@@ -883,26 +893,26 @@ export default function Insights() {
 
             {symbolPerf.slice(0, 8).map((s) => (
               <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
-  <div className="col-span-6 text-white font-medium">
-    {s.symbol}
-  </div>
+                <div className="col-span-6 text-white font-medium">
+                  {s.symbol}
+                </div>
 
-  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
-    {s.count}
-  </div>
+                <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+                  {s.count}
+                </div>
 
-  <div className="col-span-2 text-right text-zinc-400 px-2">
-    {s.winRate.toFixed(0)}%
-  </div>
+                <div className="col-span-2 text-right text-zinc-400 px-2">
+                  {s.winRate.toFixed(0)}%
+                </div>
 
-  <div
-    className={`col-span-2 text-right font-semibold pl-2 ${
-      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
-    }`}
-  >
-    {formatK(s.pnl)}
-  </div>
-</div>
+                <div
+                  className={`col-span-2 text-right font-semibold pl-2 ${
+                    s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+                  }`}
+                >
+                  {formatK(s.pnl)}
+                </div>
+              </div>
             ))}
           </div>
         </Panel>
@@ -933,26 +943,26 @@ export default function Insights() {
 
             {sessionPerf.map((s) => (
               <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
-  <div className="col-span-6 text-white font-medium">
-    {s.name}
-  </div>
+                <div className="col-span-6 text-white font-medium">
+                  {s.name}
+                </div>
 
-  <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
-    {s.count}
-  </div>
+                <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
+                  {s.count}
+                </div>
 
-  <div className="col-span-2 text-right text-zinc-400 px-2">
-    {s.winRate.toFixed(0)}%
-  </div>
+                <div className="col-span-2 text-right text-zinc-400 px-2">
+                  {s.winRate.toFixed(0)}%
+                </div>
 
-  <div
-    className={`col-span-2 text-right font-semibold pl-2 ${
-      s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
-    }`}
-  >
-    {formatK(s.pnl)}
-  </div>
-</div>
+                <div
+                  className={`col-span-2 text-right font-semibold pl-2 ${
+                    s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+                  }`}
+                >
+                  {formatK(s.pnl)}
+                </div>
+              </div>
             ))}
           </div>
         </Panel>
@@ -1075,41 +1085,43 @@ function InsightCard({
   title,
   text,
   index,
+  icon,
+  tone,
+  badge,
 }: {
   title: string;
   text: string;
   index: number;
+  icon: React.ReactNode;
+  tone: "blue" | "green" | "amber" | "rose" | "purple";
+  badge: string;
 }) {
-  const icons = [
-    <Target size={18} />,
-    <Sparkles size={18} />,
-    <Clock size={18} />,
-    <Globe size={18} />,
-    <AlertTriangle size={18} />,
-  ];
 
-  const badges = ["EDGE", "SETUP", "TIMING", "SESSION", "RISK"];
 
-  const styles = [
-    "bg-emerald-500/15 text-emerald-300 border-emerald-500/20",
-    "bg-sky-500/15 text-sky-300 border-sky-500/20",
-    "bg-amber-500/15 text-amber-300 border-amber-500/20",
-    "bg-purple-500/15 text-purple-300 border-purple-500/20",
-    "bg-rose-500/15 text-rose-300 border-rose-500/20",
-  ];
+  const toneStyles = {
+    green: {
+      iconStyle: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20",
+      accentLine: "bg-emerald-500",
+    },
+    blue: {
+      iconStyle: "bg-sky-500/15 text-sky-300 border-sky-500/20",
+      accentLine: "bg-sky-500",
+    },
+    amber: {
+      iconStyle: "bg-amber-500/15 text-amber-300 border-amber-500/20",
+      accentLine: "bg-amber-500",
+    },
+    rose: {
+      iconStyle: "bg-rose-500/15 text-rose-300 border-rose-500/20",
+      accentLine: "bg-rose-500",
+    },
+    purple: {
+      iconStyle: "bg-purple-500/15 text-purple-300 border-purple-500/20",
+      accentLine: "bg-purple-500",
+    },
+  };
 
-  const accent = [
-    "bg-emerald-500",
-    "bg-sky-500",
-    "bg-amber-500",
-    "bg-purple-500",
-    "bg-rose-500",
-  ];
-
-  const icon = icons[index % icons.length];
-  const badge = badges[index % badges.length];
-  const iconStyle = styles[index % styles.length];
-  const accentLine = accent[index % accent.length];
+  const { iconStyle, accentLine } = toneStyles[tone];
 
   return (
     <div
