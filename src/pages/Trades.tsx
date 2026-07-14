@@ -86,8 +86,11 @@ export default function Trades() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [symbol, setSymbol] = useState("");
-  const [plFilter, setPlFilter] = useState<"ALL" | "PROFIT" | "LOSS">("ALL");
+  const [plFilter, setPlFilter] = useState<"ALL" | "PROFIT" | "LOSS" | "BE">("ALL");
   const [typeFilter, setTypeFilter] = useState<"ALL" | "LONG" | "SHORT">("ALL");
+  const [sessionFilter, setSessionFilter] = useState<
+    "ALL" | "ASIAN" | "LONDON" | "NEW_YORK"
+  >("ALL");
 
   const [period, setPeriod] = useState<
     "ALL" | "TODAY" | "WEEK" | "MONTH" | "LAST_MONTH" | "LAST_3" | "CUSTOM"
@@ -135,6 +138,7 @@ export default function Trades() {
     setSymbol("");
     setPlFilter("ALL");
     setTypeFilter("ALL");
+    setSessionFilter("ALL");
     setPeriod("ALL");
     setFrom("");
     setTo("");
@@ -189,21 +193,38 @@ export default function Trades() {
             : t.side === "SELL";
 
       // P&L filter
+      const pnl = Number(t.pnl || 0);
+
       const plOk =
         plFilter === "ALL"
           ? true
           : plFilter === "PROFIT"
-            ? Number(t.pnl || 0) > 0
-            : Number(t.pnl || 0) < 0;
+            ? pnl > 0
+            : plFilter === "LOSS"
+              ? pnl < 0
+              : pnl === 0;
+
+      // SESSION FILTER
+      const session = String(t.session ?? "")
+        .trim()
+        .toLowerCase();
+      const sessionOk =
+        sessionFilter === "ALL"
+          ? true
+          : sessionFilter === "ASIAN"
+            ? session === "asian" || session === "asia"
+            : sessionFilter === "LONDON"
+              ? session === "london"
+              : session === "new york" || session === "newyork";
 
       // Date range filter (entryDate string YYYY-MM-DD)
       const d = (t.entryDate || "") as string;
       const fromOk = from ? d >= from : true;
       const toOk = to ? d <= to : true;
 
-      return symOk && typeOk && plOk && fromOk && toOk;
-    });
-  }, [trades, symbol, typeFilter, plFilter, from, to]);
+      return symOk && typeOk && sessionOk && plOk && fromOk && toOk;
+});
+  }, [trades, symbol, typeFilter, sessionFilter, plFilter, from, to]);
 
   // /* ---------- counts for chips ---------- */
   // const profitCount = useMemo(() => filtered.filter((x: any) => Number(x.pnl) > 0).length, [filtered]);
@@ -222,11 +243,37 @@ export default function Trades() {
   // Reset to page 1 whenever filters change (so user doesn't land on empty page)
   useEffect(() => {
     setPage(1);
-  }, [symbol, typeFilter, plFilter, from, to, period]);
+  }, [symbol, typeFilter, sessionFilter, plFilter, from, to, period]);
   const pageItems = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
     return filtered.slice(start, start + PAGE_SIZE);
   }, [filtered, page]);
+
+  const getPageNumbers = () => {
+    const pages: (number | "...")[] = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+
+      if (page > 3) pages.push("...");
+
+      for (
+        let i = Math.max(2, page - 1);
+        i <= Math.min(totalPages - 1, page + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+
+      if (page < totalPages - 2) pages.push("...");
+
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
 
   if (loading) return <TradesSkeleton />;
 
@@ -327,6 +374,18 @@ export default function Trades() {
                       >
                         Loss
                       </button>
+
+                      <button
+                        onClick={() => setPlFilter("BE")}
+                        className={[
+                          "flex-1 rounded-xl px-2 py-2 text-[12px] md:px-3 md:text-sm font-semibold",
+                          plFilter === "BE"
+                            ? "bg-blue-600 text-white"
+                            : "text-zinc-400 hover:bg-white/5",
+                        ].join(" ")}
+                      >
+                        BE
+                      </button>
                     </div>
                   </div>
 
@@ -375,6 +434,62 @@ export default function Trades() {
                         Short
                       </button>
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-[70px_1fr] items-center gap-2 md:flex md:items-center md:gap-3">
+                  <div className="text-[10px] font-semibold tracking-[0.18em] text-zinc-500 uppercase md:w-24">
+                    SESSION
+                  </div>
+
+                  <div className="flex items-center rounded-2xl border border-white/10 bg-black/20 p-1">
+                    <button
+                      onClick={() => setSessionFilter("ALL")}
+                      className={[
+                        "flex-1 rounded-xl px-2 py-2 text-[12px] md:px-3 md:text-sm font-semibold",
+                        sessionFilter === "ALL"
+                          ? "bg-blue-600 text-white"
+                          : "text-zinc-400 hover:bg-white/5",
+                      ].join(" ")}
+                    >
+                      All
+                    </button>
+
+                    <button
+                      onClick={() => setSessionFilter("ASIAN")}
+                      className={[
+                        "flex-1 rounded-xl px-2 py-2 text-[12px] md:px-3 md:text-sm font-semibold",
+                        sessionFilter === "ASIAN"
+                          ? "bg-blue-600 text-white"
+                          : "text-zinc-400 hover:bg-white/5",
+                      ].join(" ")}
+                    >
+                      Asian
+                    </button>
+
+                    <button
+                      onClick={() => setSessionFilter("LONDON")}
+                      className={[
+                        "flex-1 rounded-xl px-2 py-2 text-[12px] md:px-3 md:text-sm font-semibold",
+                        sessionFilter === "LONDON"
+                          ? "bg-blue-600 text-white"
+                          : "text-zinc-400 hover:bg-white/5",
+                      ].join(" ")}
+                    >
+                      London
+                    </button>
+
+                    <button
+                      onClick={() => setSessionFilter("NEW_YORK")}
+                      className={[
+                        "flex-1 rounded-xl px-2 py-2 text-[12px] md:px-3 md:text-sm font-semibold",
+                        sessionFilter === "NEW_YORK"
+                          ? "bg-blue-600 text-white"
+                          : "text-zinc-400 hover:bg-white/5",
+                      ].join(" ")}
+                    >
+                      NY
+                    </button>
                   </div>
                 </div>
 
@@ -913,6 +1028,49 @@ export default function Trades() {
                   </div>
                 </div>
               </div>
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    ← Previous
+                  </button>
+
+                  <div className="flex flex-wrap items-center justify-center gap-2">
+                    {getPageNumbers().map((p, index) =>
+                      p === "..." ? (
+                        <span key={index} className="px-2 text-zinc-500">
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className={[
+                            "h-10 w-10 rounded-xl text-sm font-bold transition",
+                            page === p
+                              ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
+                              : "border border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10",
+                          ].join(" ")}
+                        >
+                          {p}
+                        </button>
+                      ),
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>

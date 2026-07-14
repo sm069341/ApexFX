@@ -287,13 +287,27 @@ export default function Insights() {
     };
 
     for (const t of filteredTrades as any[]) {
-      const s = String(t.session ?? "");
-      if (!obj[s]) continue;
+      const rawSession = String(t.session ?? "")
+        .trim()
+        .toLowerCase();
+
+      let session: "Asia" | "London" | "New York" | null = null;
+
+      if (rawSession === "asia" || rawSession === "asian") {
+        session = "Asia";
+      } else if (rawSession === "london") {
+        session = "London";
+      } else if (rawSession === "new york" || rawSession === "newyork") {
+        session = "New York";
+      }
+
+      if (!session) continue;
 
       const pnl = safeNum(t.pnl);
-      obj[s].count += 1;
-      obj[s].pnl += pnl;
-      if (pnl > 0) obj[s].wins += 1;
+
+      obj[session].count += 1;
+      obj[session].pnl += pnl;
+      if (pnl > 0) obj[session].wins += 1;
     }
 
     return sessions
