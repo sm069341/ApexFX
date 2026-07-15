@@ -921,6 +921,67 @@ Focus on fewer high-quality setups and continue executing your edge consistently
     streakInsight,
   ]);
 
+
+  const tradingGrade = useMemo(() => {
+  let score = 0;
+
+  // Win Rate (30 pts)
+  if (summary.winRate >= 70) score += 30;
+  else if (summary.winRate >= 60) score += 25;
+  else if (summary.winRate >= 50) score += 20;
+  else if (summary.winRate >= 40) score += 10;
+
+  // Profit Factor (30 pts)
+  if (summary.profitFactor >= 2.5) score += 30;
+  else if (summary.profitFactor >= 2) score += 25;
+  else if (summary.profitFactor >= 1.5) score += 20;
+  else if (summary.profitFactor >= 1.2) score += 10;
+
+  // Risk Reward (20 pts)
+  if (averageTradeStats.riskReward >= 3) score += 20;
+  else if (averageTradeStats.riskReward >= 2) score += 15;
+  else if (averageTradeStats.riskReward >= 1.5) score += 10;
+
+  // Discipline (20 pts)
+  if (!overtradingInsight?.isWorse) score += 20;
+  else score += 10;
+
+  let grade = "F";
+  let stars = 1;
+
+  if (score >= 95) {
+    grade = "A+";
+    stars = 5;
+  } else if (score >= 90) {
+    grade = "A";
+    stars = 5;
+  } else if (score >= 85) {
+    grade = "A-";
+    stars = 5;
+  } else if (score >= 80) {
+    grade = "B+";
+    stars = 4;
+  } else if (score >= 75) {
+    grade = "B";
+    stars = 4;
+  } else if (score >= 65) {
+    grade = "C+";
+    stars = 3;
+  } else if (score >= 55) {
+    grade = "C";
+    stars = 3;
+  } else if (score >= 45) {
+    grade = "D";
+    stars = 2;
+  }
+
+  return { score, grade, stars };
+}, [
+  summary,
+  averageTradeStats,
+  overtradingInsight,
+]);
+
   const bestStrategyCard = strategyPerf.filter((s) => s.count >= 3)[0];
   // const worstStrategyCard = [...strategyPerf]
   //   .filter((s) => s.count >= 3 && s.tag !== bestStrategyCard?.tag)
@@ -1009,6 +1070,19 @@ Focus on fewer high-quality setups and continue executing your edge consistently
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+        <Metric
+          title="TRADING GRADE"
+          value={tradingGrade.grade}
+          sub={`${"⭐".repeat(tradingGrade.stars)}${"☆".repeat(
+            5 - tradingGrade.stars,
+          )} • Score ${tradingGrade.score}/100`}
+          icon={
+            <Sparkles size={30} strokeWidth={2.5} className="text-yellow-300" />
+          }
+          iconBg="bg-yellow-500/15"
+          tone="amber"
+        />
+
         <Metric
           title="AVERAGE WINNER"
           value={
@@ -1121,7 +1195,6 @@ Focus on fewer high-quality setups and continue executing your edge consistently
           </p>
         </div>
       </Panel>
-
 
       {/* AI insight cards */}
       <Panel>
