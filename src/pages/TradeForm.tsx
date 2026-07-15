@@ -45,6 +45,7 @@ export default function TradeForm() {
     "SUPPLY",
     "5Wave Choch",
     "Dual Choch",
+    "News",
   ];
   const timeframes = ["1m", "5m", "15m", "1h", "4h", "1D"];
 

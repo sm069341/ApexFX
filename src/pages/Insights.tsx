@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   BadgeCheck,
   Globe,
-  CandlestickChart,
   Target,
   DollarSign,
   Coins,
@@ -180,12 +179,27 @@ export default function Insights() {
     let wins = 0;
     let losses = 0;
 
+    let grossProfit = 0;
+    let grossLoss = 0;
+
     for (const t of rows) {
       const pnl = safeNum(t.pnl);
+
       totalPnl += pnl;
-      if (pnl > 0) wins++;
-      if (pnl < 0) losses++;
+
+      if (pnl > 0) {
+        wins++;
+        grossProfit += pnl;
+      }
+
+      if (pnl < 0) {
+        losses++;
+        grossLoss += Math.abs(pnl);
+      }
     }
+
+    const profitFactor =
+      grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? 999 : 0;
 
     return {
       count: rows.length,
@@ -193,6 +207,34 @@ export default function Insights() {
       wins,
       losses,
       winRate: rows.length ? (wins / rows.length) * 100 : 0,
+      profitFactor,
+    };
+  }, [filteredTrades]);
+
+  const averageTradeStats = useMemo(() => {
+    const rows = filteredTrades as any[];
+
+    const winners = rows.filter((t) => safeNum(t.pnl) > 0);
+    const losers = rows.filter((t) => safeNum(t.pnl) < 0);
+
+    const totalWin = winners.reduce((sum, t) => sum + safeNum(t.pnl), 0);
+
+    const totalLoss = losers.reduce(
+      (sum, t) => sum + Math.abs(safeNum(t.pnl)),
+      0,
+    );
+
+    const avgWin = winners.length ? totalWin / winners.length : 0;
+    const avgLoss = losers.length ? totalLoss / losers.length : 0;
+
+    const riskReward = avgLoss ? avgWin / avgLoss : 0;
+
+    return {
+      avgWin,
+      avgLoss,
+      riskReward,
+      winnerCount: winners.length,
+      loserCount: losers.length,
     };
   }, [filteredTrades]);
 
@@ -211,8 +253,10 @@ export default function Insights() {
       const tag = getTagLabel(t);
       if (!tag) continue;
 
-      const { timeframe } = getStrategyAndTimeframe(tag);
-      const key = tag;
+      const { strategy, timeframe } = getStrategyAndTimeframe(tag);
+
+      const key = strategy;
+
       const pnl = safeNum(t.pnl);
 
       const cur = map.get(key) ?? {
@@ -232,18 +276,69 @@ export default function Insights() {
     }
 
     return Array.from(map.entries())
-      .map(([tag, v]) => {
-        const { strategy, timeframe } = getStrategyAndTimeframe(tag);
+      .map(([strategy, v]) => ({
+        tag: strategy,
+        strategy,
+        count: v.count,
+        pnl: v.pnl,
+        winRate: v.count ? (v.wins / v.count) * 100 : 0,
+      }))
+      .sort((a, b) => b.winRate - a.winRate || b.pnl - a.pnl);
+  }, [filteredTrades]);
+
+  const setupConfidence = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        count: number;
+        wins: number;
+        pnl: number;
+      }
+    >();
+
+    for (const trade of filteredTrades as any[]) {
+      const tag = getTagLabel(trade);
+      if (!tag) continue;
+
+      const { strategy } = getStrategyAndTimeframe(tag);
+
+      // A+, A, B, C
+      const setup = strategy.trim().toUpperCase();
+
+      if (!setup) continue;
+
+      const pnl = safeNum(trade.pnl);
+
+      const current = map.get(setup) ?? {
+        count: 0,
+        wins: 0,
+        pnl: 0,
+      };
+
+      current.count++;
+      current.pnl += pnl;
+
+      if (pnl > 0) {
+        current.wins++;
+      }
+
+      map.set(setup, current);
+    }
+
+    const order = ["A+", "A", "B", "C"];
+
+    return order
+      .map((setup) => {
+        const value = map.get(setup);
+
         return {
-          tag,
-          strategy,
-          timeframe,
-          count: v.count,
-          pnl: v.pnl,
-          winRate: v.count ? (v.wins / v.count) * 100 : 0,
+          setup,
+          count: value?.count ?? 0,
+          pnl: value?.pnl ?? 0,
+          winRate: value && value.count ? (value.wins / value.count) * 100 : 0,
         };
       })
-      .sort((a, b) => b.winRate - a.winRate || b.pnl - a.pnl);
+      .filter((s) => s.count > 0);
   }, [filteredTrades]);
 
   const symbolPerf = useMemo(() => {
@@ -318,6 +413,65 @@ export default function Insights() {
         winRate: obj[name].count ? (obj[name].wins / obj[name].count) * 100 : 0,
       }))
       .sort((a, b) => b.pnl - a.pnl);
+  }, [filteredTrades]);
+
+  const dayOfWeekPerf = useMemo(() => {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+
+    const map = new Map<
+      string,
+      {
+        count: number;
+        wins: number;
+        pnl: number;
+      }
+    >();
+
+    days.forEach((d) =>
+      map.set(d, {
+        count: 0,
+        wins: 0,
+        pnl: 0,
+      }),
+    );
+
+    for (const trade of filteredTrades as any[]) {
+      const date = pickDate(trade);
+      if (!date) continue;
+
+      const day = days[date.getDay()];
+      const pnl = safeNum(trade.pnl);
+
+      const current = map.get(day)!;
+
+      current.count++;
+      current.pnl += pnl;
+
+      if (pnl > 0) {
+        current.wins++;
+      }
+    }
+
+    return days
+      .map((day) => {
+        const value = map.get(day)!;
+
+        return {
+          day,
+          count: value.count,
+          pnl: value.pnl,
+          winRate: value.count > 0 ? (value.wins / value.count) * 100 : 0,
+        };
+      })
+      .filter((d) => d.count > 0);
   }, [filteredTrades]);
 
   const bestTimeframeByStrategy = useMemo(() => {
@@ -528,6 +682,10 @@ export default function Insights() {
       .filter((s) => s.count >= 3)
       .sort((a, b) => b.winRate - a.winRate || b.pnl - a.pnl)[0];
 
+    const bestSetup = setupConfidence
+      .filter((s) => s.count >= 3)
+      .sort((a, b) => b.winRate - a.winRate || b.pnl - a.pnl)[0];
+
     if (bestStrategy) {
       list.push({
         title: "Best Strategy",
@@ -535,6 +693,18 @@ export default function Insights() {
         text: `${bestStrategy.tag} performs best with ${bestStrategy.winRate.toFixed(
           0,
         )}% win rate over ${bestStrategy.count} trades.`,
+        tone: "green",
+        icon: <BadgeCheck size={18} />,
+      });
+    }
+
+    if (bestSetup) {
+      list.push({
+        title: "Highest Confidence Setup",
+        badge: "SETUP",
+        text: `${bestSetup.setup} setups have a ${bestSetup.winRate.toFixed(
+          0,
+        )}% win rate across ${bestSetup.count} trades.`,
         tone: "green",
         icon: <BadgeCheck size={18} />,
       });
@@ -557,6 +727,10 @@ export default function Insights() {
     }
 
     const bestSession = sessionPerf.filter((s) => s.count >= 3)[0];
+
+    const bestDay = [...dayOfWeekPerf]
+      .filter((d) => d.count >= 3)
+      .sort((a, b) => b.pnl - a.pnl)[0];
 
     const bestTfInsight = bestTimeframeByStrategy.sort(
       (a, b) => b.winRate - a.winRate || b.pnl - a.pnl,
@@ -597,6 +771,18 @@ export default function Insights() {
       });
     }
 
+    if (bestDay) {
+      list.push({
+        title: "Best Trading Day",
+        badge: "WEEKLY",
+        text: `${bestDay.day} is your strongest trading day with ${formatK(
+          bestDay.pnl,
+        )} net P&L across ${bestDay.count} trades.`,
+        tone: "green",
+        icon: <Sparkles size={18} />,
+      });
+    }
+
     if (overtradingInsight?.isWorse) {
       list.push({
         title: "Overtrading Warning",
@@ -632,13 +818,107 @@ export default function Insights() {
     return list.slice(0, 5);
   }, [
     strategyPerf,
+    setupConfidence,
     symbolPerf,
     sessionPerf,
+    dayOfWeekPerf,
     overtradingInsight,
     streakInsight,
     filteredTrades.length,
     bestTimeframeByStrategy,
     bestSessionByStrategy,
+  ]);
+
+  //   const tradingGrade = useMemo(() => {
+  //   let score = 50;
+
+  //   // Win Rate (max +20)
+  //   score += Math.min(summary.winRate, 80) / 4;
+
+  //   // Profit Factor (max +20)
+  //   const pf = summary.profitFactor || 0;
+  //   score += Math.min(pf, 4) * 5;
+
+  //   // Risk Reward (max +15)
+  //   score += Math.min(averageTradeStats.riskReward, 3) * 5;
+
+  //   // Overtrading penalty
+  //   if (overtradingInsight?.isWorse) score -= 10;
+
+  //   // Loss streak penalty
+  //   if (streakInsight && streakInsight.rate > 70) score -= 5;
+
+  //   score = Math.max(0, Math.min(score, 100));
+
+  //   let grade = "D";
+
+  //   if (score >= 95) grade = "A+";
+  //   else if (score >= 90) grade = "A";
+  //   else if (score >= 85) grade = "A-";
+  //   else if (score >= 80) grade = "B+";
+  //   else if (score >= 75) grade = "B";
+  //   else if (score >= 70) grade = "B-";
+  //   else if (score >= 65) grade = "C+";
+  //   else if (score >= 60) grade = "C";
+
+  //   return {
+  //     score,
+  //     grade,
+  //   };
+  // }, [
+  //   summary.winRate,
+  //   summary.profitFactor,
+  //   averageTradeStats.riskReward,
+  //   overtradingInsight,
+  //   streakInsight,
+  // ]);
+
+  const aiSummary = useMemo(() => {
+    const bestStrategy = strategyPerf[0];
+    const bestSession = sessionPerf[0];
+    const worstSymbol = symbolPerf[symbolPerf.length - 1];
+
+    return `
+This period you executed ${summary.count} trades with a ${summary.winRate.toFixed(
+      0,
+    )}% win rate and a Profit Factor of ${summary.profitFactor.toFixed(2)}.
+
+Your strongest edge came from ${
+      bestStrategy?.strategy || bestStrategy?.tag || "your best strategy"
+    } during the ${bestSession?.name || "best"} session.
+
+Your weakest market was ${worstSymbol?.symbol || "N/A"}.
+
+Current Risk Reward averages ${averageTradeStats.riskReward.toFixed(2)}:1.
+
+${
+  overtradingInsight
+    ? overtradingInsight.isWorse
+      ? `Trading more than 3 times per day reduced your average daily profit from ${formatK(
+          overtradingInsight.lowAvg,
+        )} to ${formatK(overtradingInsight.highAvg)}.`
+      : `Higher-frequency trading has not reduced your daily profitability.`
+    : ""
+}
+
+${
+  streakInsight
+    ? `After two consecutive losing trades, the next trade was also a loss ${streakInsight.rate.toFixed(
+        0,
+      )}% of the time.`
+    : ""
+}
+
+Focus on fewer high-quality setups and continue executing your edge consistently.
+`;
+  }, [
+    summary,
+    strategyPerf,
+    sessionPerf,
+    symbolPerf,
+    averageTradeStats,
+    overtradingInsight,
+    streakInsight,
   ]);
 
   const bestStrategyCard = strategyPerf.filter((s) => s.count >= 3)[0];
@@ -730,46 +1010,72 @@ export default function Insights() {
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <Metric
-          title="TOTAL TRADES"
-          value={<span className="text-blue-500">{String(summary.count)}</span>}
-          sub="Trades in selected period"
-          icon={
-            <CandlestickChart
-              size={28}
-              strokeWidth={2.4}
-              className="text-sky-300"
-            />
+          title="AVERAGE WINNER"
+          value={
+            <span className="text-emerald-400">
+              {formatK(averageTradeStats.avgWin)}
+            </span>
           }
-          iconBg="bg-sky-500/15"
-          tone="blue"
-        />
-
-        <Metric
-          title="WIN RATE"
-          value={`${summary.winRate.toFixed(0)}%`}
-          sub={`${summary.wins} wins • ${summary.losses} losses`}
+          sub={`${averageTradeStats.winnerCount} winning trades`}
           icon={
-            <Target size={28} strokeWidth={2.4} className="text-emerald-300" />
+            <DollarSign
+              size={30}
+              strokeWidth={2.5}
+              className="text-emerald-300"
+            />
           }
           iconBg="bg-emerald-500/15"
           tone="green"
         />
 
         <Metric
-          title="NET P&L"
+          title="AVERAGE LOSER"
           value={
-            <span className="text-blue-500">{formatK(summary.totalPnl)}</span>
+            <span className="text-rose-400">
+              -{formatK(averageTradeStats.avgLoss).replace("+", "")}
+            </span>
           }
-          sub="Total result for filtered trades"
+          sub={`${averageTradeStats.loserCount} losing trades`}
           icon={
-            <DollarSign
+            <AlertTriangle
               size={30}
               strokeWidth={2.5}
-              className="text-amber-300"
+              className="text-rose-300"
             />
           }
-          iconBg="bg-amber-500/15"
-          tone={summary.totalPnl >= 0 ? "green" : "rose"}
+          iconBg="bg-rose-500/15"
+          tone="rose"
+        />
+
+        <Metric
+          title="RISK : REWARD"
+          value={
+            <span className="text-violet-300">
+              {averageTradeStats.riskReward.toFixed(2)}R
+            </span>
+          }
+          sub={
+            averageTradeStats.riskReward >= 3
+              ? "Excellent"
+              : averageTradeStats.riskReward >= 2
+                ? "Very Good"
+                : averageTradeStats.riskReward >= 1.5
+                  ? "Good"
+                  : averageTradeStats.riskReward >= 1
+                    ? "Average"
+                    : "Needs Improvement"
+          }
+          icon={
+            <Target size={30} strokeWidth={2.5} className="text-violet-300" />
+          }
+          iconBg="bg-violet-500/15"
+          tone={
+            averageTradeStats.riskReward >= 2
+              ? "green"
+              : averageTradeStats.riskReward >= 1
+                ? "amber"
+                : "rose"
+          }
         />
 
         <Metric
@@ -791,6 +1097,31 @@ export default function Insights() {
           tone="blue"
         />
       </div>
+
+      <Panel>
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-indigo-500/20 text-indigo-300">
+            <Sparkles size={20} />
+          </div>
+
+          <div>
+            <div className="text-lg font-bold text-white">
+              AI Trading Summary
+            </div>
+
+            <div className="text-sm text-zinc-400">
+              Personalized analysis of your performance
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-5">
+          <p className="leading-7 text-zinc-300 whitespace-pre-line">
+            {aiSummary}
+          </p>
+        </div>
+      </Panel>
+
 
       {/* AI insight cards */}
       <Panel>
@@ -832,56 +1163,98 @@ export default function Insights() {
       </Panel>
 
       {/* Deep breakdown */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel>
-          <div className="flex items-center gap-3 text-lg font-semibold text-white">
-            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-300 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Panel className="bg-emerald-950/20">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-300">
               <BadgeCheck size={20} strokeWidth={2.6} />
             </div>
 
             <div>
               <div className="text-lg font-bold bg-gradient-to-r from-emerald-200 to-emerald-400 bg-clip-text text-transparent">
-                Strategy Breakdown
+                Strategy Performance
               </div>
+
               <div className="text-sm text-zinc-400">
-                Best and worst setups analyzed
+                Performance by trading strategy
               </div>
             </div>
           </div>
 
-          <div className="mt-4 space-y-2">
-            <div className="grid grid-cols-12 text-xs text-zinc-500 border-b border-white/5 pb-2">
-              <div className="col-span-6">Strategy</div>
+          <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
+            {/* Header */}
+            <div className="grid grid-cols-12 bg-white/[0.03] px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="col-span-5">Strategy</div>
               <div className="col-span-2 text-right">Trades</div>
               <div className="col-span-2 text-right">Win%</div>
-              <div className="col-span-2 text-right">P&L</div>
+              <div className="col-span-3 text-right">P&L</div>
             </div>
 
-            {strategyPerf.slice(0, 8).map((s) => (
-              <div className="grid grid-cols-12 py-2 px-2 rounded-lg hover:bg-white/5 transition">
-                <div className="col-span-6 text-zinc-200 truncate">{s.tag}</div>
-
-                <div className="col-span-2 text-right text-zinc-500 border-r border-white/5 pr-2">
-                  {s.count}
-                </div>
-
-                <div className="col-span-2 text-right text-zinc-400 px-2">
-                  {s.winRate.toFixed(0)}%
-                </div>
-
-                <div
-                  className={`col-span-2 text-right font-semibold pl-2 ${
-                    s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
-                  }`}
-                >
-                  {formatK(s.pnl)}
-                </div>
+            {strategyPerf.filter((s) => s.count >= 3).length === 0 ? (
+              <div className="py-6 text-center text-sm text-zinc-500">
+                Need at least 3 trades per strategy to generate reliable
+                statistics.
               </div>
-            ))}
+            ) : (
+              strategyPerf
+                .filter((s) => s.count >= 3)
+                .sort((a, b) => b.winRate - a.winRate || b.pnl - a.pnl)
+                .slice(0, 10)
+                .map((s, index) => (
+                  <div
+                    key={s.tag}
+                    className="grid grid-cols-12 items-center border-t border-white/5 px-3 py-3 transition hover:bg-white/5"
+                  >
+                    <div className="col-span-5 flex items-center gap-3">
+                      <span
+                        className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
+                          index === 0
+                            ? "bg-yellow-500/20 text-yellow-300"
+                            : index === 1
+                              ? "bg-zinc-500/20 text-zinc-300"
+                              : index === 2
+                                ? "bg-amber-700/20 text-amber-400"
+                                : "bg-white/5 text-zinc-400"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+
+                      <span className="font-semibold text-white">
+                        {s.strategy || s.tag}
+                      </span>
+                    </div>
+
+                    <div className="col-span-2 text-right text-zinc-400">
+                      {s.count}
+                    </div>
+
+                    <div
+                      className={`col-span-2 text-right font-medium ${
+                        s.winRate >= 70
+                          ? "text-emerald-300"
+                          : s.winRate >= 50
+                            ? "text-yellow-300"
+                            : "text-rose-300"
+                      }`}
+                    >
+                      {s.winRate.toFixed(0)}%
+                    </div>
+
+                    <div
+                      className={`col-span-3 text-right font-bold ${
+                        s.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+                      }`}
+                    >
+                      {formatK(s.pnl)}
+                    </div>
+                  </div>
+                ))
+            )}
           </div>
         </Panel>
 
-        <Panel>
+        <Panel className="bg-amber-950/20">
           <div className="flex items-center gap-3 text-lg font-semibold text-white">
             <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-500/20 text-amber-300 shadow-[0_0_30px_rgba(245,158,11,0.25)]">
               <Coins size={20} strokeWidth={2.6} />
@@ -931,7 +1304,7 @@ export default function Insights() {
           </div>
         </Panel>
 
-        <Panel>
+        <Panel className="bg-sky-950/20">
           <div className="flex items-center gap-3 text-lg font-semibold text-white">
             <div className="grid h-10 w-10 place-items-center rounded-2xl bg-sky-500/20 text-sky-300 shadow-[0_0_30px_rgba(59,130,246,0.25)]">
               <Globe size={20} strokeWidth={2.6} />
@@ -980,6 +1353,58 @@ export default function Insights() {
             ))}
           </div>
         </Panel>
+
+        <Panel className="bg-violet-950/20">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-2xl bg-violet-500/20 text-violet-300">
+              📅
+            </div>
+
+            <div>
+              <div className="text-lg font-bold text-white">
+                Day of Week Analysis
+              </div>
+
+              <div className="text-sm text-zinc-400">
+                Which weekdays perform best
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-2">
+            <div className="grid grid-cols-12 border-b border-white/5 pb-2 text-xs text-zinc-500">
+              <div className="col-span-5">Day</div>
+              <div className="col-span-2 text-right">Trades</div>
+              <div className="col-span-2 text-right">Win%</div>
+              <div className="col-span-3 text-right">P&L</div>
+            </div>
+
+            {dayOfWeekPerf.map((d) => (
+              <div
+                key={d.day}
+                className="grid grid-cols-12 rounded-lg px-2 py-2 transition hover:bg-white/5"
+              >
+                <div className="col-span-5 text-white">{d.day}</div>
+
+                <div className="col-span-2 text-right text-zinc-400">
+                  {d.count}
+                </div>
+
+                <div className="col-span-2 text-right text-zinc-400">
+                  {d.winRate.toFixed(0)}%
+                </div>
+
+                <div
+                  className={`col-span-3 text-right font-semibold ${
+                    d.pnl >= 0 ? "text-emerald-300" : "text-rose-300"
+                  }`}
+                >
+                  {formatK(d.pnl)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Panel>
       </div>
     </div>
   );
@@ -989,11 +1414,17 @@ export default function Insights() {
   Small UI components
 ========================= */
 
-function Panel({ children }: { children: React.ReactNode }) {
+function Panel({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div
       className={[
-        "rounded-3xl border border-white/10 bg-zinc-950/40 p-5",
+        `rounded-3xl border border-white/10 p-5 ${className}`,
         "shadow-[0_20px_60px_rgba(0,0,0,0.45)]",
         "transition-all duration-300 ease-out",
         "hover:-translate-y-[2px] hover:border-white/15 hover:bg-zinc-950/50",
@@ -1110,37 +1541,40 @@ function InsightCard({
   tone: "blue" | "green" | "amber" | "rose" | "purple";
   badge: string;
 }) {
-
-
   const toneStyles = {
     green: {
       iconStyle: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20",
-      accentLine: "bg-emerald-500",
+    accentLine: "bg-emerald-500",
+    cardBg: "bg-emerald-950/30",
     },
     blue: {
       iconStyle: "bg-sky-500/15 text-sky-300 border-sky-500/20",
-      accentLine: "bg-sky-500",
+    accentLine: "bg-sky-500",
+    cardBg: "bg-sky-950/30",
     },
     amber: {
       iconStyle: "bg-amber-500/15 text-amber-300 border-amber-500/20",
-      accentLine: "bg-amber-500",
+    accentLine: "bg-amber-500",
+    cardBg: "bg-amber-950/30",
     },
     rose: {
       iconStyle: "bg-rose-500/15 text-rose-300 border-rose-500/20",
-      accentLine: "bg-rose-500",
+    accentLine: "bg-rose-500",
+    cardBg: "bg-rose-950/30",
     },
     purple: {
       iconStyle: "bg-purple-500/15 text-purple-300 border-purple-500/20",
-      accentLine: "bg-purple-500",
+    accentLine: "bg-purple-500",
+    cardBg: "bg-purple-950/30",
     },
   };
 
-  const { iconStyle, accentLine } = toneStyles[tone];
+  const { iconStyle, accentLine, cardBg } = toneStyles[tone];
 
   return (
     <div
       className={[
-        "group relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/40 p-5",
+        `group relative overflow-hidden rounded-3xl border border-white/10 ${cardBg} p-5`,
         "shadow-[0_20px_60px_rgba(0,0,0,0.45)]",
         "transition-all duration-300 ease-out",
         "hover:-translate-y-[3px] hover:border-white/20 hover:shadow-[0_30px_90px_rgba(0,0,0,0.6)]",
